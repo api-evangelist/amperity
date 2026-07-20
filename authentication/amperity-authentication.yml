@@ -1,0 +1,58 @@
+generated: '2026-07-17'
+method: searched
+source: https://docs.amperity.com/api/authentication.html
+docs: https://docs.amperity.com/api/authentication.html
+summary:
+  types: [oauth2, http]
+  http_scheme: bearer
+  bearer_format: JWT
+  oauth2_flows: [clientCredentials]
+overview: >-
+  Amperity APIs authenticate with a JWT bearer access token. An administrator creates an API key
+  (a synthetic identity bound to the tenant) under Settings > Security > API keys, granting it the
+  DataGrid Operator role. The API key's client_id/client_secret are exchanged for a short-lived
+  access token via the OAuth2 client-credentials token endpoint. All API requests then send the
+  token in the Authorization header, plus a tenant identifier header and a date-based api-version
+  header.
+schemes:
+- name: OAuth2ClientCredentials
+  type: oauth2
+  flows:
+  - flow: clientCredentials
+    tokenUrl: https://{tenant}.amperity.com/api/v0/oauth2/token
+    grant_type: client_credentials
+    request_content_type: application/x-www-form-urlencoded
+    request_params: [client_id, client_secret]
+    token_response:
+      access_token: string
+      token_type: Bearer
+      expires_in: 3600
+    scopes: {}
+  sources: [https://docs.amperity.com/api/authentication.html]
+- name: BearerJWT
+  type: http
+  scheme: bearer
+  bearerFormat: JWT
+  applied_via: 'Authorization: Bearer ${access-token}'
+  sources: [https://docs.amperity.com/api/authentication.html]
+required_headers:
+- name: Authorization
+  value: 'Bearer ${access-token}'
+  apis: [Amperity API, Profile API, Streaming API]
+- name: amperity-tenant
+  value: '{tenant-id}'
+  apis: [Profile API]
+- name: X-Amperity-Tenant
+  value: '{tenant-name}'
+  apis: [Amperity API, Streaming API]
+- name: api-version
+  value: 'YYYY-MM-DD (e.g. 2024-04-01 for Amperity API, 2025-07-31 for Profile API)'
+  apis: [Amperity API, Profile API]
+token_lifecycle:
+  format: JWT
+  expiry: 'expires_in seconds (default 3600); UI-generated tokens expire after a configured number of days'
+  refresh: 'no refresh-grant flow; regenerate via client-credentials exchange or the UI'
+  key_rotation: 'rotating an API key mints a new secret; previously issued tokens remain valid for 30 days (deposed state) before becoming invalid'
+notes:
+- API keys are managed under Settings > Security and require the API key administration policy.
+- The Streaming API uses a self-managed Streaming Ingest JWT token generated in the UI.
