@@ -1,0 +1,22 @@
+generated: '2026-07-17'
+method: searched
+source: live probes of /.well-known/ on Amperity hosts
+hosts:
+- host: https://app.amperity.com
+  documents:
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+- host: https://www.amperity.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 403
+- host: https://docs.amperity.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404   # host returns HTTP 200 for unknown paths but serves the docs 404 page (no security.txt)
+notes: >-
+  No machine-readable /.well-known/ discovery documents (OAuth authorization-server metadata, OIDC
+  configuration, or RFC 9116 security.txt) are published on the Amperity API or website hosts. Absence
+  recorded as valid data.

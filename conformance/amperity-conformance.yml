@@ -1,0 +1,22 @@
+generated: '2026-07-17'
+method: searched
+source: https://docs.amperity.com/api/authentication.html
+standards:
+- id: oauth2
+  conforms: true
+  evidence: OAuth2 client-credentials token endpoint (POST /api/v0/oauth2/token) issues JWT bearer tokens.
+- id: jwt
+  conforms: true
+  evidence: Access tokens are JSON Web Tokens (JWT) presented as Bearer credentials.
+- id: rfc8594-deprecation-sunset
+  conforms: true
+  evidence: Versioning policy uses Deprecation and Sunset HTTP headers with >=6 months notice.
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: Error envelope is a proprietary JSON object (status/message/request_id/trace_id), not application/problem+json.
+- id: oidc
+  conforms: false
+  evidence: No /.well-known/openid-configuration (404); no OIDC discovery published.
+- id: pagination
+  conforms: true
+  evidence: List endpoints (e.g. GET /indexes/{id}/profiles) return paginated results.

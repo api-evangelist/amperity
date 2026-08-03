@@ -1,0 +1,55 @@
+generated: '2026-07-17'
+method: derived
+status: candidate
+source: https://docs.amperity.com/reference/api.html
+note: >-
+  No official hosted/remote Amperity MCP server was found (checked docs, npm @modelcontextprotocol,
+  and MCP registries). This is a CANDIDATE tool list derived from the documented Amperity API and
+  Profile API operations, one tool per operation. Not an authoritative Amperity manifest.
+server:
+  name: amperity
+  transport: http
+  auth: OAuth2 client-credentials JWT bearer (Authorization + X-Amperity-Tenant/amperity-tenant + api-version headers)
+tools:
+- name: list_audit_events
+  description: Retrieve audit event logs.
+  source_operation: 'GET /audit-events (Amperity API)'
+- name: list_campaign_drafts
+  description: List campaign drafts.
+  source_operation: 'GET /campaign-drafts (Amperity API)'
+- name: list_campaigns
+  description: List campaigns.
+  source_operation: 'GET /campaigns (Amperity API)'
+- name: list_segments
+  description: List segments.
+  source_operation: 'GET /segments (Amperity API)'
+- name: list_ingest_jobs
+  description: Retrieve the list of ingest jobs.
+  source_operation: 'GET /ingest/jobs (Amperity API)'
+- name: get_ingest_job
+  description: Fetch details for a specific ingest job.
+  source_operation: 'GET /ingest/jobs/{id} (Amperity API)'
+- name: list_workflow_runs
+  description: Retrieve workflow run history.
+  source_operation: 'GET /workflow/runs (Amperity API)'
+- name: get_workflow_run
+  description: Fetch details for a specific workflow run.
+  source_operation: 'GET /workflow/runs/{id} (Amperity API)'
+- name: start_workflow_run
+  description: Start a new workflow run.
+  source_operation: 'POST /workflow/runs (Amperity API)'
+- name: stop_workflow_run
+  description: Stop an active workflow run.
+  source_operation: 'POST /workflow/runs/{id}/stop (Amperity API)'
+- name: list_indexes
+  description: Return a list of profile indexes.
+  source_operation: 'GET /indexes (Profile API)'
+- name: get_index
+  description: Return details for a specific index.
+  source_operation: 'GET /indexes/{id} (Profile API)'
+- name: list_profiles
+  description: Return a paginated list of customer profiles for an index.
+  source_operation: 'GET /indexes/{id}/profiles (Profile API)'
+- name: get_profile
+  description: Return a specific customer profile.
+  source_operation: 'GET /indexes/{id}/profiles/{id} (Profile API)'

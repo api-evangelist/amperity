@@ -1,0 +1,49 @@
+generated: '2026-07-17'
+method: searched
+source: https://docs.amperity.com/api/overview.html
+docs:
+- https://docs.amperity.com/api/overview.html
+- https://docs.amperity.com/api/versioning.html
+- https://docs.amperity.com/api/responses.html
+- https://docs.amperity.com/api/rate_limits.html
+authentication:
+  style: oauth2-client-credentials
+  token: JWT bearer in Authorization header
+  ref: authentication/amperity-authentication.yml
+versioning:
+  scheme: date-string
+  mechanism: required api-version header (or query parameter)
+  header: api-version
+  current:
+    amperity_api: '2024-04-01'
+    profile_api: '2025-07-31'
+  unsupported_version_response: 400
+  ref: lifecycle/amperity-lifecycle.yml
+pagination:
+  style: paginated
+  notes: >-
+    The Profile API returns a paginated list of customer profiles (GET /indexes/{id}/profiles) and the
+    Amperity API list endpoints are paged. Exact cursor/limit parameter names are documented on the
+    Pagination reference page (docs surface is an SPA; parameter names not captured verbatim here).
+  docs: https://docs.amperity.com/api/pagination.html
+idempotency:
+  supported: false
+  notes: Amperity does not document an idempotency-key header or contract for its APIs as of this pass.
+request_tracing:
+  fields: [request_id, trace_id]
+  location: error response body (and Amperity request/trace identifiers)
+error_envelope:
+  format: proprietary-json
+  rfc9457: false
+  fields: [status, message, request_id, trace_id]
+  ref: errors/amperity-problem-types.yml
+rate_limiting:
+  amperity_api: 10 requests per second
+  profile_api: 2000 requests per second across the entire tenant (including sandboxes)
+  streaming_api: 1000 requests per second; max payload 1 MB
+  exceeded_response: 429
+  payload_too_large_response: 413
+  headers: none documented
+content_types:
+  request: [application/x-www-form-urlencoded (token), application/json, application/xml (streaming)]
+  streaming_conversion: JSON converted to NDJSON; XML converted to CBOR

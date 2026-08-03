@@ -1,0 +1,63 @@
+generated: '2026-07-17'
+method: searched
+source: https://docs.amperity.com/reference/api.html
+note: >-
+  Entity graph derived from the documented Amperity API and Profile API resources (no downloadable
+  OpenAPI is published — the docs site is a rendered SPA). Relationships are conservative, based on the
+  documented endpoint paths.
+entities:
+- name: Tenant
+  description: An Amperity tenant; the top-level container all resources belong to. Identified via the X-Amperity-Tenant / amperity-tenant header.
+- name: Index
+  description: A profile index containing unified customer profiles.
+  api: Profile API
+  operations: ['GET /indexes', 'GET /indexes/{id}']
+- name: Profile
+  description: A unified customer profile (Customer 360) within an index.
+  api: Profile API
+  operations: ['GET /indexes/{id}/profiles', 'GET /indexes/{id}/profiles/{id}']
+- name: Campaign
+  description: A marketing campaign.
+  api: Amperity API
+  operations: [GET /campaigns]
+- name: CampaignDraft
+  description: A draft campaign.
+  api: Amperity API
+  operations: [GET /campaign-drafts]
+- name: Segment
+  description: An audience segment.
+  api: Amperity API
+  operations: [GET /segments]
+- name: IngestJob
+  description: A data ingestion job.
+  api: Amperity API
+  operations: ['GET /ingest/jobs', 'GET /ingest/jobs/{id}']
+- name: WorkflowRun
+  description: An execution of an Amperity workflow.
+  api: Amperity API
+  operations: ['GET /workflow/runs', 'GET /workflow/runs/{id}', 'POST /workflow/runs', 'POST /workflow/runs/{id}/stop']
+- name: AuditEvent
+  description: A tenant audit-log event.
+  api: Amperity API
+  operations: [GET /audit-events]
+- name: Stream
+  description: A tenant-specific data stream that accepts real-time ingestion.
+  api: Streaming API
+  operations: ['POST /stream/v0/data/{stream-id}']
+relationships:
+- from: Index
+  to: Profile
+  type: has_many
+  via: index id path segment
+- from: Profile
+  to: Index
+  type: belongs_to
+  via: 'id in /indexes/{id}/profiles'
+- from: CampaignDraft
+  to: Campaign
+  type: has_one
+  via: draft promoted to campaign
+- from: Tenant
+  to: [Index, Campaign, Segment, IngestJob, WorkflowRun, AuditEvent, Stream]
+  type: has_many
+  via: tenant header scoping

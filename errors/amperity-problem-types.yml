@@ -1,0 +1,49 @@
+generated: '2026-07-17'
+method: searched
+source: https://docs.amperity.com/api/responses.html
+format: proprietary-json
+rfc9457: false
+envelope:
+  fields:
+  - {name: status, description: numeric HTTP status code}
+  - {name: message, description: human-readable description}
+  - {name: request_id, description: optional Amperity request identifier}
+  - {name: trace_id, description: optional Amperity tracing identifier}
+  example: |
+    {
+      "status": 400,
+      "message": "Error updating database: Cannot find campaign named 'CampaignName'",
+      "request_id": "1ab23456-c78d-9012-3456-78efg9hi01j2",
+      "trace_id": "1a2b3456789cd0ef1g234hijklm5nopq"
+    }
+problems:
+- status: 400
+  title: Bad request
+  remediation: Fix malformed request parameters or body; also returned for unsupported api-version values.
+- status: 401
+  title: Authentication required
+  remediation: Provide a valid Bearer JWT access token in the Authorization header.
+- status: 403
+  title: Not authorized
+  remediation: Ensure the API key/token has the required policy (e.g. DataGrid Operator) for the resource.
+- status: 404
+  title: Not found
+  remediation: Verify the resource id and tenant.
+- status: 405
+  title: Method not allowed
+  remediation: Use a supported HTTP method for the endpoint.
+- status: 409
+  title: Conflict
+  remediation: Resolve the conflicting state before retrying.
+- status: 413
+  title: Payload too large
+  remediation: Streaming API payloads must not exceed 1 MB.
+- status: 429
+  title: Rate limit exceeded
+  remediation: Back off and retry; request a limit increase via Support if needed.
+- status: 500
+  title: Server error
+  remediation: Retry later; contact Support with request_id/trace_id if it persists.
+- status: 503
+  title: Service unavailable
+  remediation: Retry with backoff; check the status page.

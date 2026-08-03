@@ -1,0 +1,36 @@
+generated: '2026-07-17'
+method: searched
+source: https://docs.amperity.com/api/changelog.html
+scheme: date-string-versions
+apis:
+- api: Amperity Profile API
+  current_version: '2025-07-31'
+- api: Amperity API
+  current_version: '2024-04-01'
+entries:
+- version: '2025-07-31'
+  api: Amperity Profile API
+  date: '2025-07-31'
+  breaking: false
+  additions:
+  - GET /indexes
+  - GET /indexes/{id}
+  - GET /indexes/{id}/profiles
+  - GET /indexes/{id}/profiles/{id}
+  highlights: Initial Profile API version adding index listing and paginated customer-profile retrieval.
+- version: '2024-04-01'
+  api: Amperity API
+  date: '2024-04-01'
+  breaking: false
+  additions:
+  - GET /audit-events
+  - GET /campaign-drafts
+  - GET /campaigns
+  - GET /ingest/jobs
+  - GET /ingest/jobs/{id}
+  - GET /segments
+  - GET /workflow/runs
+  - GET /workflow/runs/{id}
+  - POST /workflow/runs
+  - POST /workflow/runs/{id}/stop
+  highlights: Initial Amperity API version introducing campaign, segment, ingest, audit-event and workflow-run operations.

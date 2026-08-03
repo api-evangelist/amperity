@@ -1,0 +1,25 @@
+generated: '2026-07-17'
+method: searched
+source: https://docs.amperity.com/api/versioning.html
+versioning:
+  scheme: date-string
+  mechanism: required api-version request header (or query parameter)
+  header: api-version
+  current:
+    amperity_api: '2024-04-01'
+    profile_api: '2025-07-31'
+  unsupported_version_response: 400
+  docs: https://docs.amperity.com/api/versioning.html
+deprecation:
+  policy: At least 6 months notice before deprecation; a deprecation date is at least 3 months before its sunset date.
+  headers:
+    deprecation: true    # RFC 8594 Deprecation header signals an upcoming deprecation
+    sunset: true         # RFC 8594 Sunset header marks when a version stops working (returns 4xx)
+  sunset_behavior: Sunset/unsupported versions return a 4xx (400) response.
+  policy_url: https://docs.amperity.com/api/versioning.html
+status_page: https://status.amperity.com
+status_page_platform: Atlassian Statuspage
+status_feeds:
+  atom: https://status.amperity.com/history.atom
+  rss: https://status.amperity.com/history.rss
+deprecated_operations: []
