@@ -8,9 +8,14 @@ description: >-
   to downstream destinations. For developers, Amperity exposes three public REST APIs: the Amperity API
   for programmatic access to tenant resources (campaigns, segments, ingest jobs, audit events, and
   workflow runs), the Profile API for real-time access to unified customer profiles by index, and the
-  Streaming API for low-latency, high-throughput ingestion of events from external systems. The APIs use
-  OAuth2 client-credentials tokens (JWT bearer), date-based versioning via an api-version header, and an
-  RFC 8594 deprecation/sunset policy. Amperity serves retail, travel, hospitality, financial services,
+  Streaming API for low-latency, high-throughput ingestion of events from external systems. Amperity
+  publishes a downloadable OpenAPI 3.0.3 document for the Amperity API plus a separate unstable preview
+  spec, and it hosts an official remote Model Context Protocol server at mcp.amperity.com exposing more
+  than 200 tools across databases, queries, Stitch identity resolution, couriers, destinations,
+  campaigns, journeys and predictive models, gated by OAuth2 authorization-code with PKCE and
+  per-session safety modes. The REST APIs use OAuth2 client-credentials tokens (JWT bearer),
+  cursor pagination, date-based versioning via an api-version header, and an RFC 8594
+  deprecation/sunset policy. Amperity serves retail, travel, hospitality, financial services,
   and other consumer-facing verticals.
 url: https://raw.githubusercontent.com/api-evangelist/amperity/refs/heads/main/apis.yml
 x-type: company
@@ -32,7 +37,7 @@ accessModel:
 image: https://docs.amperity.com/_static/icon-light.svg
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-08-13'
 tags:
 - Company
 - Enterprise
@@ -44,6 +49,10 @@ tags:
 - Data
 - Profiles
 - Analytics
+- MCP
+- Agents
+- Retail
+- Identity
 apis:
 - name: Amperity API
   description: >-
@@ -79,6 +88,70 @@ apis:
     url: data-model/amperity-data-model.yml
   - type: MCPServer
     url: mcp/amperity-mcp.yml
+  - type: OpenAPI
+    url: openapi/amperity-control-plane-2024-04-01-openapi.json
+  - type: Overlay
+    url: overlays/amperity-control-plane-overlay.yaml
+  - type: RateLimits
+    url: rate-limits/amperity-rate-limits.yml
+  - type: Sandbox
+    url: sandbox/amperity-sandbox.yml
+  - type: AgentSkill
+    url: skills/_index.yml
+  - type: AgenticAccess
+    url: agentic-access/amperity-agentic-access.yml
+  - type: Webhooks
+    url: asyncapi/amperity-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/amperity-tool-crosswalk.yml
+- name: Amperity API (Unstable)
+  description: >-
+    Amperity's preview track for the Amperity API, published as a separate OpenAPI document alongside
+    the stable 2024-04-01 spec. Currently adds GET /campaign-drafts on top of the stable operation set.
+    Same base URL, same bearer auth, same required headers; the api-version header takes the value
+    "unstable".
+  humanURL: https://docs.amperity.com/api/openapi-unstable.html
+  baseURL: https://app.amperity.com/api
+  tags:
+  - Amperity API
+  - Unstable
+  - Preview
+  properties:
+  - type: OpenAPI
+    url: openapi/amperity-control-plane-unstable-openapi.json
+  - type: Documentation
+    url: https://docs.amperity.com/api/openapi-unstable.html
+- name: Amperity MCP Server
+  description: >-
+    Amperity's official hosted remote Model Context Protocol server. A single public endpoint at
+    https://mcp.amperity.com routes each request to the Amperity stack holding the calling user's
+    tenant, and exposes more than 200 tools across databases, queries, Stitch identity resolution,
+    couriers and feeds, destinations, orchestrations, campaigns and journeys, predictive models and
+    Spark. Authenticates with OAuth2 authorization-code + PKCE against the user's own Amperity
+    credentials, with per-user isolation and per-session safety modes gating writes to production
+    tenants. Wider than the REST API by two orders of magnitude.
+  humanURL: https://docs.amperity.com/api/mcp_overview.html
+  baseURL: https://mcp.amperity.com
+  tags:
+  - MCP
+  - Agents
+  - AI
+  - Customer Data Platform
+  properties:
+  - type: MCPServer
+    url: mcp/amperity-mcp.yml
+  - type: ToolCrosswalk
+    url: mcp/amperity-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs.amperity.com/api/mcp_overview.html
+  - type: APIReference
+    url: https://docs.amperity.com/api/mcp_tool_reference.html
+  - type: GettingStarted
+    url: https://docs.amperity.com/api/mcp_setup_claude.html
+  - type: Authentication
+    url: authentication/amperity-authentication.yml
+  - type: WellKnown
+    url: well-known/amperity-well-known.yml
 - name: Amperity Profile API
   description: >-
     RESTful API for real-time access to unified customer profiles. List indexes, fetch an index, and
@@ -94,6 +167,10 @@ apis:
   properties:
   - type: Documentation
     url: https://docs.amperity.com/operator/api_profile.html
+  - type: RateLimits
+    url: rate-limits/amperity-rate-limits.yml
+  - type: Authentication
+    url: authentication/amperity-authentication.yml
 - name: Amperity Streaming API
   description: >-
     Low-latency, high-throughput REST API for real-time ingestion of event data from external systems
@@ -108,12 +185,18 @@ apis:
   properties:
   - type: Documentation
     url: https://docs.amperity.com/operator/api_streaming.html
+  - type: RateLimits
+    url: rate-limits/amperity-rate-limits.yml
+  - type: Webhooks
+    url: asyncapi/amperity-webhooks.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: AgenticAccess
+  url: agentic-access/amperity-agentic-access.yml
 - type: Website
   url: https://www.amperity.com
 - type: DeveloperPortal
@@ -152,8 +235,38 @@ common:
   url: well-known/amperity-well-known.yml
 - type: DomainSecurity
   url: security/amperity-domain-security.yml
+- type: OpenAPI
+  url: openapi/amperity-control-plane-2024-04-01-openapi.json
+- type: Overlay
+  url: overlays/amperity-control-plane-overlay.yaml
+- type: ToolCrosswalk
+  url: mcp/amperity-tool-crosswalk.yml
+- type: Packages
+  url: packages/amperity-packages.yml
+- type: CLI
+  url: cli/amperity-cli.yml
+- type: RateLimits
+  url: rate-limits/amperity-rate-limits.yml
+- type: Plans
+  url: plans/amperity-plans-pricing.yml
+- type: Sandbox
+  url: sandbox/amperity-sandbox.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Webhooks
+  url: asyncapi/amperity-webhooks.yml
+- type: TrustCenter
+  url: security/amperity-trust-center.yml
+- type: Compliance
+  url: https://trust.amperity.com/
 x-enrichment:
-  date: '2026-07-19'
-  status: backfilled
+  date: '2026-08-13'
+  status: enriched
+  artifacts_added: 12
   pass: local-v1
-  note: backfilled from .gitignore signal + verified work evidence
+  note: >-
+    Contract discovery beat the prior round's "no downloadable OpenAPI" finding. Two real OpenAPI
+    3.0.3 documents were harvested from https://docs.amperity.com/downloads/openapi/, and Amperity's
+    officially hosted remote MCP server at https://mcp.amperity.com (227 documented tools, OAuth2
+    authorization-code + PKCE, RFC 8414/9728 discovery) was found and probed, upgrading the MCP
+    artifact from a derived candidate to searched/published.
