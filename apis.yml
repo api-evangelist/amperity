@@ -35,7 +35,7 @@ accessModel:
   generated: '2026-07-22'
   method: derived
 image: https://docs.amperity.com/_static/icon-light.svg
-specificationVersion: '0.20'
+specificationVersion: '0.23'
 created: '2026-07-17'
 modified: '2026-08-13'
 tags:
