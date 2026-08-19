@@ -1,0 +1,19 @@
+generated: '2026-08-13'
+method: generated
+source: >-
+  Grounded in openapi/amperity-control-plane-2024-04-01-openapi.json (operationIds verified verbatim
+  against the spec) and Amperity's published MCP documentation. No provider-published skills or
+  AGENTS.md were found on docs.amperity.com or github.com/amperity.
+skills:
+- file: amperity-run-and-monitor-workflow.md
+  name: Run and monitor an Amperity workflow
+  api: openapi/amperity-control-plane-2024-04-01-openapi.json
+  operations: [run-workflow, get-workflow, list-workflows, stop-workflow]
+- file: amperity-paginate-list-endpoints.md
+  name: Paginate any Amperity list endpoint
+  api: openapi/amperity-control-plane-2024-04-01-openapi.json
+  operations: [list-events, list-campaign, list-segment, list-ingest-jobs, list-workflows]
+- file: amperity-mcp-safe-operation.md
+  name: Operate Amperity safely over MCP
+  api: mcp/amperity-mcp.yml
+  operations: [session_start, tenant_list, tenant_info, tenant_use, safety_get_mode, safety_set_mode]

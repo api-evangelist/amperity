@@ -1,0 +1,39 @@
+generated: '2026-08-13'
+method: searched
+source: https://docs.amperity.com/api/mcp_overview.html
+checked: '2026-08-13'
+plan_count: 0
+model: enterprise-contract
+currency: null
+note: >-
+  Amperity publishes NO price list, no plan tiers and no self-serve signup. It sells as an enterprise
+  contract negotiated with sales, and nothing in the readable developer surface names a price, a tier,
+  a free allowance or an overage rate. What Amperity does publish is the UNIT of consumption: "amps",
+  Amperity's usage credits, described in the MCP documentation as being consumed "when an agent runs an
+  operation that does work, such as kicking off a database run or identity resolution" - the same
+  consumption a user incurs performing that operation in the Amperity UI. The rate at which amps are
+  priced or granted is not published anywhere public.
+billing_unit:
+  name: amps
+  description: >-
+    Amperity's usage credits. Consumed by operations that do work (database runs, identity resolution),
+    not by API or MCP calls themselves. Amperity states explicitly that enabling the MCP server does not
+    consume amps and that running an operation through MCP adds no extra amp cost over running it in
+    the UI.
+  rate_published: false
+  source: https://docs.amperity.com/api/mcp_overview.html
+third_party_metering:
+  note: >-
+    LLM token cost for the Amperity MCP server is metered and billed by the customer's own AI platform
+    (Claude, ChatGPT, Copilot Studio), never by Amperity.
+  source: https://docs.amperity.com/api/mcp_overview.html
+plans: []
+coverage:
+  pricing_page_probed: https://www.amperity.com/pricing
+  pricing_page_status: 429
+  pricing_page_note: >-
+    The Amperity marketing site (www.amperity.com) is served behind a Vercel Security Checkpoint bot
+    challenge that answers 403 or 429 with an interstitial to every non-browser request, including
+    /sitemap.xml. So the absence of a published price list is established from the developer/docs
+    surface (docs.amperity.com, fully readable, zero pricing content) rather than from the marketing
+    site, which could not be read at all on this pass.

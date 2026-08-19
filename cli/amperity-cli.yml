@@ -1,0 +1,106 @@
+generated: '2026-08-13'
+method: searched
+source: https://github.com/amperity/chuck-data
+docs:
+- https://github.com/amperity/chuck-data
+- https://chuckdata.ai
+- https://pypi.org/project/chuck-data/
+checked: '2026-08-13'
+name: Chuck Data
+binary: chuck
+official: true
+license: Apache-2.0
+description: >-
+  Chuck Data is Amperity's first-party command-line/TUI tool - an interactive text UI for data
+  engineering across Databricks and AWS (Redshift + EMR) with AI assistance, whose identity-resolution
+  capability is powered by Amperity Stitch. It authenticates to Amperity with browser-based OAuth.
+scope_note: >-
+  Chuck is NOT a CLI over the Amperity REST API - it does not wrap the Amperity API, Profile API or
+  Streaming API endpoints. It is a separate product surface that reaches Amperity Stitch and the
+  customer's own warehouse. Amperity ships no CLI for its published REST APIs.
+install:
+- method: homebrew
+  command: brew tap amperity/chuck-data && brew install chuck-data
+  recommended: true
+- method: pip
+  command: pip install chuck-data
+- method: pip-extras
+  command: pip install chuck-data[aws]
+  note: Adds the AWS/Bedrock dependencies.
+package: packages/amperity-packages.yml
+authentication:
+- service: Amperity
+  method: browser-based OAuth
+  commands: [/login, /logout]
+- service: Databricks
+  method: personal access token
+  commands: [/set-token]
+- service: AWS
+  method: standard AWS credential chain (SSO, env vars, ~/.aws/credentials, IAM role)
+config_file: ~/.chuck_config.json
+env_vars: [CHUCK_LLM_PROVIDER, AWS_PROFILE, AWS_REGION]
+command_groups:
+- group: general
+  commands:
+  - {command: /help, description: Show all available commands}
+  - {command: /getting-started, description: Display the getting-started guide}
+  - {command: /status, description: Show current connection status and application context}
+  - {command: /setup, description: Run the interactive initial setup wizard}
+- group: authentication
+  commands:
+  - {command: /login, description: Log in to Amperity (browser-based OAuth)}
+  - {command: /logout, description: Log out of Amperity, Databricks, or all services}
+  - {command: '/set-token <token>', description: Set or update your Databricks personal access token}
+- group: models
+  commands:
+  - {command: /list-models, alias: /models, description: List available LLM models}
+  - {command: '/select-model <model_name>', description: Set the active LLM model}
+- group: warehouses
+  commands:
+  - {command: /list-warehouses, alias: /warehouses, description: List SQL warehouses}
+  - {command: '/select-warehouse <warehouse_name>', description: Set the active warehouse for query execution}
+  - {command: '/create-warehouse <name>', description: Create a new SQL warehouse}
+- group: unity-catalog
+  commands:
+  - {command: /catalogs, description: List Unity Catalog catalogs}
+  - {command: '/select-catalog <catalog_name>', description: Set the active catalog context}
+  - {command: /schemas, description: List schemas in the active catalog}
+  - {command: '/select-schema <schema_name>', description: Set the active schema context}
+  - {command: /list-tables, description: List tables in the active catalog/schema}
+  - {command: '/table <table_name>', description: Show detailed schema and metadata for a table}
+- group: redshift
+  commands:
+  - {command: /list-databases, description: List databases in Redshift}
+  - {command: '/select-database <database_name>', description: Set the active Redshift database}
+  - {command: /list-redshift-schemas, description: List schemas in the active Redshift database}
+  - {command: '/select-redshift-schema <schema_name>', description: Set the active Redshift schema}
+  - {command: /redshift-status, description: Show Redshift connection status and configuration}
+- group: sql-and-storage
+  commands:
+  - {command: '/run-sql <query>', description: Execute a SQL query on the active warehouse or Redshift cluster}
+  - {command: /volumes, description: List volumes in the active catalog}
+  - {command: '/create-volume <name>', description: Create a new volume}
+  - {command: /upload-file, description: Upload a file to a volume}
+- group: pii
+  commands:
+  - {command: '/scan-pii [table_name]', description: Scan a table for PII columns using an LLM}
+  - {command: '/tag-pii [columns]', description: Tag specific columns with PII semantic tags in Unity Catalog}
+  - {command: /bulk-tag-pii, description: Scan all tables in the active schema for PII}
+- group: stitch
+  commands:
+  - {command: /setup-stitch, description: Run the interactive setup wizard for Amperity Stitch}
+  - {command: /stitch-status, description: Check the status of a running Stitch job}
+  - {command: /add-stitch-report, description: Add an analysis report to Stitch output}
+- group: jobs
+  commands:
+  - {command: /jobs, description: List jobs}
+  - {command: '/job-status <job_id>', description: Get the status of a specific job}
+  - {command: /list-jobs, description: List recent job runs}
+  - {command: '/monitor-job <job_id>', description: Monitor a job in real time}
+- group: support
+  commands:
+  - {command: /bug, description: Submit a bug report automatically with context}
+  - {command: /discord, description: Open the Discord community link}
+  - {command: /support, description: Display support options}
+community:
+  discord: https://discord.gg/f3UZwyuQqe

@@ -1,12 +1,30 @@
-generated: '2026-07-17'
+generated: '2026-08-13'
 method: searched
 source: https://docs.amperity.com/api/changelog.html
+docs:
+- https://docs.amperity.com/api/changelog.html
+- https://docs.amperity.com/api/versioning.html
+checked: '2026-08-13'
 scheme: date-string-versions
+scheme_note: >-
+  API versions are ISO dates sent in the required api-version header. Amperity has shipped exactly two
+  versions across two APIs, and neither has ever been superseded - the stable Amperity API is still on
+  its launch version 2024-04-01, whose value is the sole member of the api-version enum in the
+  published OpenAPI.
 apis:
-- api: Amperity Profile API
-  current_version: '2025-07-31'
 - api: Amperity API
   current_version: '2024-04-01'
+  spec: openapi/amperity-control-plane-2024-04-01-openapi.json
+- api: Amperity API (Unstable)
+  current_version: unstable
+  spec: openapi/amperity-control-plane-unstable-openapi.json
+  note: >-
+    A separate preview track Amperity publishes alongside the stable spec. It currently adds one
+    operation the stable spec does not have - GET /campaign-drafts (list-campaign-draft) - and two
+    extra component schemas. This is the changelog signal for what is coming next.
+- api: Amperity Profile API
+  current_version: '2025-07-31'
+  spec: null
 entries:
 - version: '2025-07-31'
   api: Amperity Profile API
@@ -24,13 +42,23 @@ entries:
   breaking: false
   additions:
   - GET /audit-events
-  - GET /campaign-drafts
   - GET /campaigns
-  - GET /ingest/jobs
-  - GET /ingest/jobs/{id}
   - GET /segments
+  - GET /ingest/jobs
+  - GET /ingest/jobs/{job-id}
   - GET /workflow/runs
-  - GET /workflow/runs/{id}
   - POST /workflow/runs
-  - POST /workflow/runs/{id}/stop
-  highlights: Initial Amperity API version introducing campaign, segment, ingest, audit-event and workflow-run operations.
+  - GET /workflow/runs/{workflow-id}
+  - POST /workflow/runs/{workflow-id}/stop
+  highlights: >-
+    Initial Amperity API version introducing audit-event, campaign, segment, ingest-job and
+    workflow-run operations. Still the current stable version.
+unversioned_surface:
+  note: >-
+    The Amperity MCP server is NOT covered by the dated api-version scheme and does not appear in the
+    API changelog. Amperity ships it as a hosted service at https://mcp.amperity.com whose tool surface
+    changes without a published version, and its own documentation says tools/list is the canonical
+    list "available to your account" - i.e. the contract is discovered at runtime, per account, rather
+    than pinned to a version. For a surface Amperity documents at more than 200 tools, that is the
+    largest unversioned part of its API estate.
+  ref: mcp/amperity-mcp.yml

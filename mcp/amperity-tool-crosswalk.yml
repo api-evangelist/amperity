@@ -1,0 +1,179 @@
+generated: '2026-08-13'
+method: derived
+source: >-
+  mcp/amperity-mcp.yml (227 tools transcribed from https://docs.amperity.com/api/mcp_tool_reference.html)
+  bound against openapi/amperity-control-plane-2024-04-01-openapi.json and
+  openapi/amperity-control-plane-unstable-openapi.json
+note: >-
+  Amperity's own MCP documentation states plainly that the MCP server "does not replace the Amperity
+  REST API" and directs non-agent integrations to the REST API. This crosswalk measures that divergence:
+  the hosted MCP server exposes 227 tools across the whole Amperity product surface (databases, Stitch,
+  couriers, journeys, predictions, Spark), while the published OpenAPI covers 10 operations across five
+  resources. The two are overlapping-but-non-identical projections of one core, and MCP is by far the
+  wider one. Bindings are by name and documented semantics: the live MCP tools/list is OAuth-gated
+  (HTTP 401), so no per-tool inputSchema was available to confirm parameter-level equivalence, and
+  confidence is set accordingly.
+surfaces:
+  openapi:
+  - file: openapi/amperity-control-plane-2024-04-01-openapi.json
+    title: Amperity API
+    version: '2024-04-01'
+    operations: 9
+    gated: false
+  - file: openapi/amperity-control-plane-unstable-openapi.json
+    title: Amperity API (Unstable)
+    version: unstable
+    operations: 10
+    gated: false
+  mcp:
+    url: https://mcp.amperity.com
+    tools: 227
+    gated: true
+    gate: 'POST tools/list returns HTTP 401; OAuth authorization_code + PKCE required'
+  graphql: null
+crosswalk:
+- tool: campaign_list
+  category: campaigns-journeys
+  rest: [list-campaign]
+  binding: rest
+  confidence: high
+  note: 'GET /campaigns. Same resource, same list semantics.'
+- tool: iq_list
+  category: segments
+  rest: [list-segment]
+  binding: rest
+  confidence: high
+  note: 'GET /segments. Amperity names the segment domain "iq" in MCP tools and "segments" in REST.'
+- tool: workflow_list
+  category: workflows-compute
+  rest: [list-workflows]
+  binding: rest
+  confidence: high
+  note: 'GET /workflow/runs.'
+- tool: workflow_get_status
+  category: workflows-compute
+  rest: [get-workflow]
+  binding: rest
+  confidence: medium
+  note: >-
+    GET /workflow/runs/{workflow-id}. The REST operation returns the full workflow record; the MCP tool
+    is named for the status projection. Shape equivalence unconfirmed while tools/list is gated.
+- tool: workflow_cancel
+  category: workflows-compute
+  rest: [stop-workflow]
+  binding: rest
+  confidence: high
+  note: 'POST /workflow/runs/{workflow-id}/stop.'
+- tool: courier_group_run
+  category: couriers-feeds-destinations
+  rest: [run-workflow]
+  binding: rest
+  confidence: medium
+  note: >-
+    POST /workflow/runs. The OpenAPI description for run-workflow states it "supports running courier
+    groups, orchestration groups, and campaigns", so this tool is one of three fan-in callers of a
+    single REST operation. Amperity requires safety mode unrestricted AND confirm:true for this tool.
+- tool: orchestration_group_run
+  category: orchestrations
+  rest: [run-workflow]
+  binding: rest
+  confidence: medium
+  note: >-
+    POST /workflow/runs, same fan-in as courier_group_run. Requires unrestricted + confirm:true.
+- tool: campaign_schedule
+  category: campaigns-journeys
+  rest: [run-workflow]
+  binding: rest
+  confidence: low
+  note: >-
+    The REST run-workflow operation can run a campaign, but scheduling/unscheduling a send is not the
+    same act as starting a run. Mapped as the nearest REST neighbour, not an equivalent.
+    Requires unrestricted + confirm:true.
+mcp_only:
+- tool_group: databases-tables
+  tools: 33
+  reason: >-
+    Customer 360 database, dataset, core-table and domain-transform management has no public REST
+    operation in either published OpenAPI.
+- tool_group: identity-resolution
+  tools: 11
+  reason: >-
+    Stitch run/report/explain-pair/benchmark tooling is MCP-only; identity resolution is Amperity's
+    marquee capability and it has no REST surface in the published spec.
+- tool_group: bridge
+  tools: 17
+  reason: Amperity Bridge configuration, sync and share management is MCP-only.
+- tool_group: couriers-feeds-destinations
+  tools: 26
+  reason: >-
+    All courier/feed/source/destination CRUD is MCP-only; only courier_group_run has a REST analogue
+    via the generic run-workflow operation.
+- tool_group: queries
+  tools: 16
+  reason: Query authoring, running, column stats and folders are MCP-only.
+- tool_group: predictions
+  tools: 11
+  reason: Prediction model and model-config lifecycle is MCP-only.
+- tool_group: campaigns-journeys
+  tools: 21
+  reason: >-
+    Campaign create/update/delete/duplicate/move, campaign folders and the whole journey surface
+    (versions, run, schedule, node schema) are MCP-only. REST exposes campaigns read-only.
+- tool_group: tenants-sessions
+  tools: 16
+  reason: >-
+    Session bootstrap, tenant switching, sandbox lifecycle (create/compare/pull/push/merge-warnings) and
+    safety-mode control are MCP protocol/session concerns with no REST equivalent.
+- tool_group: users-access
+  tools: 6
+  reason: User and policy administration is MCP-only.
+- tool_group: orchestrations
+  tools: 10
+  reason: Orchestration and orchestration-group CRUD is MCP-only.
+- tool_group: config-history
+  tools: 8
+  reason: Configuration history, diff, revert and the computation graph are MCP-only.
+- tool_group: workflows-compute
+  tools: 13
+  reason: >-
+    Spark application/job/stage/SQL/executor introspection, workflow task inspection and compute
+    settings are MCP-only.
+- tool_group: segments
+  tools: 14
+  reason: >-
+    Segment CRUD/activate, segment folders, company context documents and the AmpAI system prompt are
+    MCP-only. REST exposes segments read-only.
+- tool_group: data-exports
+  tools: 5
+  reason: Database export slices (slc-xxx) are MCP-only.
+- tool_group: labels
+  tools: 5
+  reason: Label CRUD is MCP-only.
+- tool_group: alerts-training
+  tools: 5
+  reason: Alert subscriptions and semantic-tag training tasks are MCP-only.
+- tool_group: deep-links
+  tools: 1
+  reason: >-
+    build_object_url constructs an Amperity UI deep link locally with no API call at all - it has no
+    backing operation on any surface.
+rest_only:
+- capability: audit events
+  operations: [list-events]
+  note: 'GET /audit-events has no MCP tool in the published tool reference.'
+- capability: ingest jobs
+  operations: [list-ingest-jobs, get-ingest-job]
+  note: >-
+    GET /ingest/jobs and GET /ingest/jobs/{job-id} have no MCP tool. MCP covers ingest through the
+    courier/feed/source domain instead, which is a different model of the same job surface.
+- capability: campaign drafts
+  operations: [list-campaign-draft]
+  note: >-
+    GET /campaign-drafts exists only in the unstable spec and has no MCP tool.
+coverage:
+  mcp_tools_named: 227
+  mcp_tools_bound_to_rest: 8
+  mcp_only_tools: 219
+  rest_operations_total: 10
+  rest_operations_with_a_tool: 6
+  rest_operations_without_a_tool: 4

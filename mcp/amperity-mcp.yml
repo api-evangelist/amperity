@@ -1,55 +1,805 @@
-generated: '2026-07-17'
-method: derived
-status: candidate
-source: https://docs.amperity.com/reference/api.html
+generated: '2026-08-13'
+method: searched
+source: https://docs.amperity.com/api/mcp_overview.html
+status: published
+docs:
+- https://docs.amperity.com/api/mcp_overview.html
+- https://docs.amperity.com/api/mcp_tool_reference.html
+- https://docs.amperity.com/api/mcp_safety_modes.html
+- https://docs.amperity.com/api/mcp_setup_claude.html
+- https://docs.amperity.com/api/mcp_setup_chatgpt.html
+- https://docs.amperity.com/api/mcp_setup_m365_copilot.html
 note: >-
-  No official hosted/remote Amperity MCP server was found (checked docs, npm @modelcontextprotocol,
-  and MCP registries). This is a CANDIDATE tool list derived from the documented Amperity API and
-  Profile API operations, one tool per operation. Not an authoritative Amperity manifest.
+  Amperity publishes and HOSTS an official remote MCP server at https://mcp.amperity.com. Amperity's
+  own documentation states the server is hosted by Amperity, that customers connect to a single public
+  endpoint, and that it is not installed or run locally. The tool list below is transcribed verbatim
+  from Amperity's published MCP tool reference (domain_action naming convention, grouped by domain);
+  it is NOT derived from the REST OpenAPI. A live tools/list against the endpoint returned HTTP 401
+  (www-authenticate: Bearer resource_metadata=.../.well-known/oauth-protected-resource), so per-tool
+  inputSchema requires an authenticated introspection and is not captured here.
+deployment:
+  mode: remote
+  endpoint: https://mcp.amperity.com
+  auth: oauth
+  verified: probed
+  probe:
+    url: https://mcp.amperity.com
+    method: 'POST jsonrpc tools/list'
+    http_status: 401
+    www_authenticate: 'Bearer resource_metadata="https://mcp.amperity.com/.well-known/oauth-protected-resource"'
+    checked: '2026-08-13'
 server:
   name: amperity
   transport: http
-  auth: OAuth2 client-credentials JWT bearer (Authorization + X-Amperity-Tenant/amperity-tenant + api-version headers)
+  url: https://mcp.amperity.com
+  hosted_by: Amperity
+  routing: >-
+    The single public URL automatically routes each request to the Amperity stack that hosts the
+    calling user's tenant.
+  isolation: >-
+    Per-user isolation. Each request is authenticated and scoped to the calling user's identity,
+    tenant, and permissions. The MCP server does not bypass Amperity authorization.
+  session_state: >-
+    Per-token session state (selected tenant and safety mode) persists across requests within the same
+    session. Conversation history is not stored.
+auth:
+  type: oauth2
+  flow: authorization_code
+  pkce: S256
+  issuer: https://mcp.amperity.com
+  authorization_endpoint: https://mcp.amperity.com/authorize
+  token_endpoint: https://mcp.amperity.com/oauth/token
+  registration_endpoint: https://mcp.amperity.com/oauth/register
+  dynamic_client_registration: true
+  published_client_id: nwbd0MGCyh1VysmYQM05UoDXIuVPdGEs   # published verbatim in the Amperity Claude setup docs
+  discovery:
+  - well-known/amperity-oauth-authorization-server.json
+  - well-known/amperity-oauth-protected-resource.json
+  - well-known/amperity-openid-configuration.json
+clients:
+- name: Claude.ai / Claude Desktop / Claude Code
+  docs: https://docs.amperity.com/api/mcp_setup_claude.html
+  install: claude mcp add --transport http --scope user amperity https://mcp.amperity.com
+- name: ChatGPT custom connectors
+  docs: https://docs.amperity.com/api/mcp_setup_chatgpt.html
+- name: Microsoft Copilot Studio
+  docs: https://docs.amperity.com/api/mcp_setup_m365_copilot.html
+  note: >-
+    Copilot Studio limits how many tools an agent can register, so the Amperity MCP server serves a
+    curated subset of tools to Copilot Studio connections.
+- name: Gemini (Antigravity, Gemini CLI)
+  docs: https://docs.amperity.com/api/mcp_setup_gemini.html
+- name: Snowflake Cortex Agents
+  docs: https://docs.amperity.com/api/mcp_setup_snowflake_cortex.html
+safety_modes:
+  docs: https://docs.amperity.com/api/mcp_safety_modes.html
+  scope: per-session, per-user
+  default: strict
+  control_tools: [safety_get_mode, safety_set_mode]
+  modes:
+  - mode: strict
+    production: Write operations blocked; read operations allowed.
+    sandbox: Read and write operations allowed.
+  - mode: confirm
+    production: "Write operations require an explicit confirm: true argument from the agent."
+    sandbox: Read and write operations allowed.
+  - mode: unrestricted
+    production: All operations allowed without explicit confirmation.
+    sandbox: Read and write operations allowed.
+  always_confirm:
+    tools: [campaign_schedule, courier_group_run, orchestration_group_run]
+    rule: >-
+      These tools always require safety mode unrestricted AND confirm: true, because they send data to
+      downstream systems outside Amperity.
+  caveat: >-
+    Amperity documents safety mode as a guardrail, not a permission boundary - the agent itself can
+    call safety_set_mode. The true permission boundary is the tool permissions configured in the MCP
+    client plus the calling user's Amperity policies.
+metering:
+  tokens: Metered and billed by the customer's own AI platform, never by Amperity.
+  amps: >-
+    Amperity usage credits are consumed when an agent runs an operation that does work (a database run,
+    identity resolution). Running it through MCP adds no extra amp cost over the UI.
+tool_count: 227
+tool_count_source: >-
+  227 tool names transcribed from the published MCP tool reference; Amperity states "more than 200
+  tools" and that tools/list is the canonical, per-account authoritative surface.
 tools:
-- name: list_audit_events
-  description: Retrieve audit event logs.
-  source_operation: 'GET /audit-events (Amperity API)'
-- name: list_campaign_drafts
-  description: List campaign drafts.
-  source_operation: 'GET /campaign-drafts (Amperity API)'
-- name: list_campaigns
-  description: List campaigns.
-  source_operation: 'GET /campaigns (Amperity API)'
-- name: list_segments
-  description: List segments.
-  source_operation: 'GET /segments (Amperity API)'
-- name: list_ingest_jobs
-  description: Retrieve the list of ingest jobs.
-  source_operation: 'GET /ingest/jobs (Amperity API)'
-- name: get_ingest_job
-  description: Fetch details for a specific ingest job.
-  source_operation: 'GET /ingest/jobs/{id} (Amperity API)'
-- name: list_workflow_runs
-  description: Retrieve workflow run history.
-  source_operation: 'GET /workflow/runs (Amperity API)'
-- name: get_workflow_run
-  description: Fetch details for a specific workflow run.
-  source_operation: 'GET /workflow/runs/{id} (Amperity API)'
-- name: start_workflow_run
-  description: Start a new workflow run.
-  source_operation: 'POST /workflow/runs (Amperity API)'
-- name: stop_workflow_run
-  description: Stop an active workflow run.
-  source_operation: 'POST /workflow/runs/{id}/stop (Amperity API)'
-- name: list_indexes
-  description: Return a list of profile indexes.
-  source_operation: 'GET /indexes (Profile API)'
-- name: get_index
-  description: Return details for a specific index.
-  source_operation: 'GET /indexes/{id} (Profile API)'
-- name: list_profiles
-  description: Return a paginated list of customer profiles for an index.
-  source_operation: 'GET /indexes/{id}/profiles (Profile API)'
-- name: get_profile
-  description: Return a specific customer profile.
-  source_operation: 'GET /indexes/{id}/profiles/{id} (Profile API)'
+# Tenants and sessions
+- name: session_start
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: tenant_list
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: tenant_info
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: tenant_use
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: tenant_resync
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: sandbox_create
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: sandbox_get_create_status
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: sandbox_delete
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: sandbox_get_status
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: sandbox_compare
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: sandbox_get_merge_warnings
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: sandbox_pull
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: sandbox_push
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: safety_get_mode
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: safety_set_mode
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: feedback_submit
+  category: tenants-sessions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Users and access
+- name: user_list
+  category: users-access
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: user_create
+  category: users-access
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: user_delete
+  category: users-access
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: policy_list
+  category: users-access
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: user_grant_policy
+  category: users-access
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: user_revoke_policy
+  category: users-access
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Databases and tables
+- name: database_list
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: database_get_schema
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: database_get_table
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: database_list_tables
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: database_create
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: database_create_table
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: database_update
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: database_update_table
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: database_activate
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: database_run
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: database_discard
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: database_delete
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: database_delete_table
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: database_get_validation_report
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: database_list_validation_reports
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: dataset_get_catalog
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: dataset_list_tables
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: dataset_get_table
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: core_table_list
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: core_table_get
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: core_table_get_tenant_schema
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: core_table_analyze
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: core_table_upsert
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: core_table_delete
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: domain_transform_list
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: domain_transform_get
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: domain_transform_upsert
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: domain_transform_analyze
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: domain_transform_delete
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: domain_table_history_get_history
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: table_run_history_list_runs
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: table_run_history_get_run
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: table_run_history_get_table_history
+  category: databases-tables
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Queries
+- name: queries_list
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: queries_get
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: queries_create
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: queries_update
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: queries_delete
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: queries_run
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: queries_activate
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: queries_discard
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: queries_move
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: query_run
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: query_get_column_stats
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: query_folder_list
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: query_folder_get
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: query_folder_create
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: query_folder_update
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: query_folder_delete
+  category: queries
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Identity resolution
+- name: stitch_run
+  category: identity-resolution
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: stitch_get_report
+  category: identity-resolution
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: stitch_list_recent_reports
+  category: identity-resolution
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: stitch_lookup_record
+  category: identity-resolution
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: stitch_explain_pair
+  category: identity-resolution
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: stitch_get_settings
+  category: identity-resolution
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: stitch_update_settings
+  category: identity-resolution
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: stitch_set_table_availability
+  category: identity-resolution
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: stitch_list_benchmarks
+  category: identity-resolution
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: stitch_get_benchmark_examples
+  category: identity-resolution
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: stitch_get_benchmark_history
+  category: identity-resolution
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Amperity Bridge
+- name: bridge_list
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_get
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_create
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_update
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_delete
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_connect
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_disconnect
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_run_sync
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_get_sync
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_update_sync
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_create_share
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_get_share
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_delete_share
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_list_share_tables
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_upload_credential
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_download_credential
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: bridge_load_amperity_data
+  category: bridge
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Couriers, feeds, and destinations
+- name: courier_list
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: courier_get
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: courier_create
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: courier_update
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: courier_delete
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: courier_run
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: courier_group_list
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: courier_group_get
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: courier_group_create
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: courier_group_update
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: courier_group_delete
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: courier_group_run
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: feed_list
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: feed_get
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: feed_upsert
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: feed_delete
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: source_list
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: source_create
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: destination_list
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: destination_get
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: destination_create
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: destination_update
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: destination_delete
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: destination_list_target_templates
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: destination_get_target_template
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: destination_create_target_template
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: destination_delete_target_template
+  category: couriers-feeds-destinations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Orchestrations
+- name: orchestration_list
+  category: orchestrations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: orchestration_get
+  category: orchestrations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: orchestration_create
+  category: orchestrations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: orchestration_update
+  category: orchestrations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: orchestration_delete
+  category: orchestrations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: orchestration_group_list
+  category: orchestrations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: orchestration_group_get
+  category: orchestrations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: orchestration_group_create
+  category: orchestrations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: orchestration_group_update
+  category: orchestrations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: orchestration_group_delete
+  category: orchestrations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: orchestration_group_run
+  category: orchestrations
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Campaigns and journeys
+- name: campaign_list
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: campaign_get
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: campaign_create
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: campaign_update
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: campaign_delete
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: campaign_duplicate
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: campaign_move
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: campaign_schedule
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: campaign_folder_list
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: campaign_folder_get
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: campaign_folder_create
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: campaign_folder_update
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: campaign_folder_delete
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: journey_list
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: journey_get
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: journey_delete
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: journey_list_versions
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: journey_get_version
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: journey_create_version
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: journey_update_version
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: journey_run
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: journey_schedule
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: journey_unschedule
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: journey_get_node_schema
+  category: campaigns-journeys
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Data exports
+- name: slice_list
+  category: data-exports
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: slice_get
+  category: data-exports
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: slice_create
+  category: data-exports
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: slice_update
+  category: data-exports
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: slice_delete
+  category: data-exports
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Predictions
+- name: prediction_list_models
+  category: predictions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: prediction_get_model
+  category: predictions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: prediction_create_model
+  category: predictions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: prediction_update_model
+  category: predictions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: prediction_delete_model
+  category: predictions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: prediction_list_model_configs
+  category: predictions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: prediction_get_model_config
+  category: predictions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: prediction_create_model_config
+  category: predictions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: prediction_delete_model_config
+  category: predictions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: prediction_validate_model_config
+  category: predictions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: prediction_get_model_config_validation_results
+  category: predictions
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Segments
+- name: iq_list
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: iq_get
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: iq_create
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: iq_update
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: iq_delete
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: iq_activate
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: iq_folder_list
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: iq_folder_get
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: iq_folder_create
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: iq_folder_update
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: iq_folder_delete
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: context_documents_list
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: context_documents_get
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: context_documents_create
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: ai_system_prompt_get
+  category: segments
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Labels
+- name: label_list
+  category: labels
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: label_get
+  category: labels
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: label_create
+  category: labels
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: label_update
+  category: labels
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: label_delete
+  category: labels
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Configuration history and recovery
+- name: config_history_search
+  category: config-history
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: config_history_get_version_nodes
+  category: config-history
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: config_history_diff_node
+  category: config-history
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: config_revert_compare_revert
+  category: config-history
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: config_revert_revert
+  category: config-history
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: comp_graph_get
+  category: config-history
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: comp_graph_get_dependents
+  category: config-history
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: comp_graph_get_dependencies
+  category: config-history
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Workflows and compute
+- name: workflow_list
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: workflow_get_status
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: workflow_get_task
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: workflow_cancel
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: workflow_resolve_task
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: spark_get_application
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: spark_list_jobs
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: spark_list_stages
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: spark_get_stage
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: spark_list_sql
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: spark_get_sql
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: spark_list_executors
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: spark_get_environment
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: spark_list_storage
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: compute_get_settings
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: compute_update_settings
+  category: workflows-compute
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Alerts and training
+- name: alert_list_subscriptions
+  category: alerts-training
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: alert_get_subscription
+  category: alerts-training
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: alert_subscribe
+  category: alerts-training
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: alert_unsubscribe
+  category: alerts-training
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+- name: training_setup_semantic_tags
+  category: alerts-training
+  source: https://docs.amperity.com/api/mcp_tool_reference.html
+# Deep links
+- name: build_object_url
+  category: deep-links
+  source: https://docs.amperity.com/api/mcp_tool_reference.html

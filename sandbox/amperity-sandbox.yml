@@ -1,0 +1,77 @@
+generated: '2026-08-13'
+method: searched
+source: https://docs.amperity.com/api/base_url.html
+docs:
+- https://docs.amperity.com/api/base_url.html
+- https://docs.amperity.com/api/requests.html
+- https://docs.amperity.com/api/mcp_safety_modes.html
+- https://docs.amperity.com/operator/api_streaming.html
+checked: '2026-08-13'
+model: sandbox-tenant
+summary: >-
+  Amperity's test surface is a SANDBOX TENANT, not a test-mode key. There are no test API keys, no test
+  key prefixes, no magic test values and no hosted fixture data - a sandbox is a real, separately
+  identified copy of a tenant that you address with the same base URL and a different tenant ID. This
+  is worth noting for agents: the production and sandbox request URLs are IDENTICAL, so the ONLY thing
+  standing between a test call and a production call is the value of one header.
+separation:
+  mechanism: tenant-id header
+  key_prefixes: none
+  test_keys: none
+  base_url_differs: false
+  discriminator:
+    header: Amperity-Tenant
+    aliases: [amperity-tenant, X-Amperity-Tenant]
+    production_example: socktown
+    sandbox_example: socktown-sb-12345
+    note: >-
+      Amperity's own docs: "A sandbox must use the tenant ID for the sandbox. The request URL must be
+      the same as the base URL of your production tenant." Sandbox tenant IDs carry an -sb- infix in
+      Amperity's published example.
+  azure_exception:
+    note: >-
+      On Azure-hosted tenants the base URL is https://{tenant-id}.amperity.com/api and the tenant ID
+      appears in BOTH the URL and the header. The docs state the sandbox base URL is still the same as
+      production's, so the header remains the discriminator.
+provisioning:
+  self_serve: false
+  via_api: false
+  via_mcp: true
+  mcp_tools: [sandbox_create, sandbox_get_create_status, sandbox_delete, sandbox_get_status,
+    sandbox_compare, sandbox_get_merge_warnings, sandbox_pull, sandbox_push]
+  note: >-
+    Sandbox lifecycle - create, delete, status, compare, merge-warning inspection, and pull/push of
+    configuration between sandbox and parent - is exposed through the Amperity MCP server, not through
+    the published REST API.
+agent_guardrail:
+  name: MCP safety mode
+  docs: https://docs.amperity.com/api/mcp_safety_modes.html
+  default: strict
+  behavior: >-
+    In the default strict mode the Amperity MCP server BLOCKS write operations against production
+    tenants while allowing read and write against sandbox tenants. That makes "strict" a genuine
+    sandbox-only execution mode for agents, and it is on by default for every new session.
+  escalation: >-
+    A session must be moved to confirm (write requires confirm:true) or unrestricted before an agent
+    can write to production. Amperity warns this is a guardrail, not a permission boundary - the agent
+    itself can call safety_set_mode.
+  ref: mcp/amperity-mcp.yml
+rate_limits_in_sandbox:
+- api: Amperity Profile API
+  shared_with_production: true
+  note: 'The 2000 rps tenant limit is consumed across the entire tenant INCLUDING its sandboxes.'
+- api: Amperity Streaming API
+  shared_with_production: false
+  note: 'Streaming limits are not shared; each sandbox has its own 1000 rps budget.'
+test_values:
+  cards: null
+  accounts: null
+  tokens: null
+  identifiers: null
+  note: >-
+    Amperity publishes no magic test values of any kind. It is a customer-data platform, not a payments
+    or comms API - the equivalent of test data here is the customer's own data loaded into a sandbox
+    tenant. Recorded as absent rather than invented.
+time_simulation:
+  supported: false
+  note: No test clock or time-simulation facility is documented.

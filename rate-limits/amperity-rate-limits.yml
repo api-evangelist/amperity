@@ -1,0 +1,69 @@
+generated: '2026-08-13'
+method: searched
+source: https://docs.amperity.com/api/rate_limits.html
+docs:
+- https://docs.amperity.com/api/rate_limits.html
+- https://docs.amperity.com/operator/api_profile.html
+- https://docs.amperity.com/operator/api_streaming.html
+checked: '2026-08-13'
+limit_count: 4
+headers_documented: false
+headers_note: >-
+  Amperity documents the numbers but publishes NO rate-limit response headers - there is no
+  X-RateLimit-*, RateLimit-* or Retry-After contract in the API docs, and the published OpenAPI
+  declares no rate-limit response headers on any operation. An agent can only discover exhaustion by
+  receiving the status code; it cannot read remaining budget or a reset time. This is the single
+  biggest runtime-signal gap in Amperity's API surface.
+exhaustion:
+  status: 429
+  body: 'Standard Amperity error envelope (status / message / request_id / trace_id).'
+  retry_after: not documented
+rate_limits:
+- api: Amperity API
+  scope: per-endpoint
+  limit: 10
+  unit: requests
+  window: 1s
+  burst: not documented
+  status_on_exhaustion: 429
+  source: https://docs.amperity.com/api/rate_limits.html
+  note: >-
+    "The Amperity API supports requests to endpoints that do not exceed a rate of 10 requests per
+    second." Response times vary by endpoint; some requests may take seconds to return.
+- api: Amperity Profile API
+  scope: per-tenant
+  limit: 2000
+  unit: requests
+  window: 1s
+  burst: not documented
+  status_on_exhaustion: 429
+  source: https://docs.amperity.com/operator/api_profile.html
+  note: >-
+    2000 requests per second across the ENTIRE tenant, including its sandboxes - sandbox traffic
+    consumes the production budget.
+- api: Amperity Streaming API
+  scope: per-tenant
+  limit: 1000
+  unit: requests
+  window: 1s
+  burst: not documented
+  status_on_exhaustion: 429
+  source: https://docs.amperity.com/operator/api_streaming.html
+  note: >-
+    Unlike the Profile API, Streaming API rate limits are NOT shared between production and sandboxes -
+    each sandbox has its own 1000 rps budget.
+- api: Amperity Streaming API
+  scope: per-request
+  kind: payload-size
+  limit: 1
+  unit: MB
+  window: per request
+  status_on_exhaustion: 413
+  source: https://docs.amperity.com/operator/api_streaming.html
+  note: 'Maximum payload size is 1 MB; larger posts fail with HTTP 413 Payload Too Large.'
+increases:
+  supported: true
+  process: >-
+    Rate-limit increases are reviewed case by case. Requests go through Amperity Support or the
+    account's Customer Success Manager.
+  source: https://docs.amperity.com/api/rate_limits.html

@@ -1,0 +1,9 @@
+{
+    "resource": "https://mcp.amperity.com",
+    "authorization_servers": [
+        "https://mcp.amperity.com"
+    ],
+    "bearer_methods_supported": [
+        "header"
+    ]
+}

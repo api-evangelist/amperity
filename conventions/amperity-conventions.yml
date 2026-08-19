@@ -1,18 +1,38 @@
-generated: '2026-07-17'
+generated: '2026-08-13'
 method: searched
 source: https://docs.amperity.com/api/overview.html
+derived_from: openapi/amperity-control-plane-2024-04-01-openapi.json
 docs:
 - https://docs.amperity.com/api/overview.html
-- https://docs.amperity.com/api/versioning.html
+- https://docs.amperity.com/api/authentication.html
+- https://docs.amperity.com/api/base_url.html
+- https://docs.amperity.com/api/requests.html
 - https://docs.amperity.com/api/responses.html
+- https://docs.amperity.com/api/pagination.html
 - https://docs.amperity.com/api/rate_limits.html
+- https://docs.amperity.com/api/versioning.html
+checked: '2026-08-13'
 authentication:
   style: oauth2-client-credentials
-  token: JWT bearer in Authorization header
+  token: JWT bearer in the Authorization header
+  spec_scheme: BearerAuth (http/bearer)
   ref: authentication/amperity-authentication.yml
+required_headers:
+- {name: Authorization, value: 'Bearer ${access-token}', required: true}
+- {name: Amperity-Tenant, value: '{tenant-id}', required: true, note: 'The Profile API documents this as amperity-tenant and the Streaming API as X-Amperity-Tenant; the OpenAPI declares amperity-tenant. Same header, three published spellings.'}
+- {name: api-version, value: 'YYYY-MM-DD', required: true, note: 'Spec enum for the stable Amperity API is a single value: 2024-04-01.'}
+base_url:
+  aws: https://app.amperity.com/api
+  azure: https://{tenant-id}.amperity.com/api
+  australia: https://app-aws-apse2.amperity.com/api
+  sandbox: 'Same base URL as production; the Amperity-Tenant header carries the sandbox tenant ID.'
+  note: >-
+    On Azure the tenant ID must appear in BOTH the URL and the header. On AWS it appears in the header
+    only.
+  ref: sandbox/amperity-sandbox.yml
 versioning:
   scheme: date-string
-  mechanism: required api-version header (or query parameter)
+  mechanism: required api-version request header (or query parameter)
   header: api-version
   current:
     amperity_api: '2024-04-01'
@@ -20,30 +40,73 @@ versioning:
   unsupported_version_response: 400
   ref: lifecycle/amperity-lifecycle.yml
 pagination:
-  style: paginated
-  notes: >-
-    The Profile API returns a paginated list of customer profiles (GET /indexes/{id}/profiles) and the
-    Amperity API list endpoints are paged. Exact cursor/limit parameter names are documented on the
-    Pagination reference page (docs surface is an SPA; parameter names not captured verbatim here).
+  style: cursor
+  applies_to: 'Every GET endpoint.'
+  request_params:
+  - {name: limit, in: query, type: integer, description: Maximum records in a single page of results}
+  - {name: next_token, in: query, type: string, description: 'Opaque cursor. Omit to return the first page. Cannot be null.', spec_example: ZVEy1iwsKBs9a6H}
+  - {name: with_total, in: query, type: boolean, default: false, description: 'Include a total count of all results. Amperity warns this can be expensive over many pages.'}
+  response_fields:
+  - {name: data, type: array, description: The current page of results}
+  - {name: next_token, type: string, description: 'Cursor for the next request. When empty/absent, the last page has been returned.'}
+  - {name: total, type: integer, description: 'Only returned when with_total=true.'}
+  termination: 'The result set is exhausted when next_token is not returned (or is empty).'
   docs: https://docs.amperity.com/api/pagination.html
+  spec_components: [Limit, NextToken, WithTotal]
 idempotency:
   supported: false
-  notes: Amperity does not document an idempotency-key header or contract for its APIs as of this pass.
+  header: null
+  notes: >-
+    Amperity documents no idempotency-key header, no request-deduplication window and no safe-retry
+    contract, and the OpenAPI declares no Idempotency-Key parameter on either write operation
+    (run-workflow, stop-workflow). POST /workflow/runs is therefore not safely retryable: a client that
+    times out and retries can start the workflow twice. Recorded as absent - no Idempotency pointer is
+    emitted for this provider.
+  agent_impact: >-
+    On the MCP side Amperity substitutes a human-gating model instead - safety modes plus confirm:true
+    - which controls WHETHER a write happens but does nothing about a DUPLICATE write.
+field_expansion:
+  supported: false
+  note: No expand/include/fields parameter is documented or present in the spec.
+sparse_fields:
+  supported: false
+metadata:
+  supported: false
+  note: No customer-defined metadata object on any resource in the published spec.
 request_tracing:
   fields: [request_id, trace_id]
-  location: error response body (and Amperity request/trace identifiers)
+  location: 'Error response body only - no request-id RESPONSE HEADER is documented.'
+  note: >-
+    Because the identifiers appear only in error bodies, a client cannot correlate a SUCCESSFUL call
+    with Amperity's logs. Support escalation is documented against request_id/trace_id from failures.
 error_envelope:
   format: proprietary-json
   rfc9457: false
   fields: [status, message, request_id, trace_id]
+  content_type: application/json
   ref: errors/amperity-problem-types.yml
 rate_limiting:
   amperity_api: 10 requests per second
   profile_api: 2000 requests per second across the entire tenant (including sandboxes)
-  streaming_api: 1000 requests per second; max payload 1 MB
+  streaming_api: 1000 requests per second per tenant, not shared with sandboxes; max payload 1 MB
   exceeded_response: 429
   payload_too_large_response: 413
-  headers: none documented
+  headers: none published
+  ref: rate-limits/amperity-rate-limits.yml
 content_types:
-  request: [application/x-www-form-urlencoded (token), application/json, application/xml (streaming)]
-  streaming_conversion: JSON converted to NDJSON; XML converted to CBOR
+  token_request: application/x-www-form-urlencoded
+  request: [application/json, 'application/xml (Streaming API only)']
+  response: application/json
+  streaming_conversion: 'JSON is converted to NDJSON; XML is converted to CBOR.'
+naming:
+  path_style: kebab-case (/campaign-drafts, /audit-events, /workflow/runs)
+  field_style: snake_case (next_token, with_total, created_at, principal_email)
+  operation_id_style: kebab-case verb-noun (list-campaign, run-workflow, stop-workflow)
+  id_prefixes: 'Not published for REST resources. The MCP tool reference documents slc-xxx for database export slices and agp-* for policy ids.'
+agent_surface:
+  mcp: mcp/amperity-mcp.yml
+  crosswalk: mcp/amperity-tool-crosswalk.yml
+  note: >-
+    The MCP server carries its own conventions layer that the REST API does not have: per-session
+    safety modes, a confirm:true argument on writes, and tools that always require explicit
+    confirmation. See mcp/amperity-mcp.yml.

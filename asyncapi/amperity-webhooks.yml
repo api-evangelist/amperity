@@ -1,0 +1,65 @@
+generated: '2026-08-13'
+method: searched
+source: https://docs.amperity.com/operator/destination_webhook.md
+docs:
+- https://docs.amperity.com/operator/destination_webhook.html
+- https://github.com/amperity/amperity-lambda-runner
+checked: '2026-08-13'
+spec_type: null
+spec_note: >-
+  Amperity publishes NO AsyncAPI document. Searched the docs site, the llms.txt index set, the
+  github.com/amperity organization and /asyncapi.yaml on every host - nothing. Recorded as absent, not
+  fabricated.
+surface: webhook-destination
+surface_note: >-
+  Amperity's event surface is outbound-only and destination-shaped. There is no subscribe-to-events
+  webhook catalog in the usual sense: an operator configures a WEBHOOK DESTINATION, and when a query's
+  results are published Amperity writes an NDJSON file to S3, mints a presigned download URL, and then
+  calls a customer-hosted AWS Lambda endpoint with a fixed JSON payload. The customer's function pulls
+  the data and reports back to a public Amperity endpoint so the run can be tracked. That is a real,
+  documented, contract-bearing callback - but it is one generic delivery event, not a catalog of typed
+  business events (no customer.created, no segment.updated, no workflow.completed).
+inbound_events:
+  supported: false
+  note: >-
+    Inbound real-time ingestion is the Streaming API (POST JSON/XML up to 1 MB), which is a plain REST
+    ingest endpoint, not an event/pub-sub contract. See apis.yml -> Amperity Streaming API.
+webhooks:
+- name: webhook-destination-delivery
+  direction: outbound
+  trigger: >-
+    A campaign or query orchestration publishes results to a configured webhook destination.
+  transport: 'HTTPS request to a customer-owned AWS Lambda endpoint outside the Amperity VPC'
+  data_delivery: >-
+    Results are serialized to NDJSON, published to Amazon S3, and exposed through a presigned URL. The
+    payload carries the URL; it does not carry the rows.
+  payload_fields:
+  - {name: settings, description: 'Destination/data-template settings, as a JSON object'}
+  - {name: label_name, description: The label associated with the delivery}
+  - {name: access_token, description: Token used by the receiving function when calling back to Amperity}
+  - {name: webhook_id, description: Identifier of the configured webhook destination}
+  - {name: callback_url, description: Public Amperity endpoint the Lambda function reports progress and success to}
+  - {name: data_url, description: Presigned URL from which the NDJSON result file is downloaded}
+  payload_source: https://docs.amperity.com/operator/destination_webhook.html
+  callback:
+    required: true
+    note: >-
+      Amperity tracks the Lambda run and monitors it for success using the same tooling as its
+      first-party integrations, so the receiving function MUST post regular updates back to
+      callback_url. The webhook is a two-way handshake, not fire-and-forget.
+  toolkit:
+    name: amperity-lambda-runner
+    url: https://github.com/amperity/amperity-lambda-runner
+    language: python
+    note: >-
+      Amperity's open-source reference template, helper class and local-environment tooling for
+      building the receiving function. Last pushed 2023-09-08.
+  security_note: >-
+    No signature, HMAC or timestamp verification scheme is documented for the inbound request to the
+    customer's Lambda; the published contract is a bearer access_token inside the JSON body. Recorded
+    as documented, not endorsed.
+gaps:
+- 'No AsyncAPI document.'
+- 'No typed event catalog - one generic delivery callback covers the whole surface.'
+- 'No documented signing/verification scheme for the outbound request.'
+- 'No event schemas or examples beyond the six-field payload above.'

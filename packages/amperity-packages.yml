@@ -1,0 +1,146 @@
+generated: '2026-08-13'
+method: searched
+source: >-
+  registry metadata from pypi.org and clojars.org, plus the github.com/amperity organization and
+  https://docs.amperity.com/api/
+checked: '2026-08-13'
+note: >-
+  IMPORTANT FINDING - Amperity publishes NO first-party client SDK for the Amperity API, the Profile
+  API or the Streaming API in any language. Searched npm, PyPI, Maven Central, NuGet, pkg.go.dev,
+  RubyGems, Packagist, crates.io and Clojars; the Amperity API docs themselves point developers at the
+  downloadable OpenAPI specification and a generic API tool such as Postman rather than at a client
+  library. What Amperity does publish is (a) chuck-data, a first-party AI/CLI tool for data engineering
+  that authenticates to Amperity, and (b) a substantial estate of general-purpose Clojure/JVM
+  infrastructure libraries under the com.amperity Clojars group. Those Clojure libraries are real,
+  maintained, first-party open source, but none of them is a client for an Amperity public API, so
+  none is counted as an API SDK.
+sdk_count: 0
+sdk_count_note: >-
+  Zero first-party client libraries for any Amperity public API. Not an omission in this artifact -
+  a genuine gap in the provider's developer surface.
+packages:
+- language: python
+  registry: pypi
+  name: chuck-data
+  url: https://pypi.org/project/chuck-data/
+  install: pip install chuck-data
+  version: 0.5.0
+  published: '2026-03-24'
+  license: Apache-2.0
+  requires_python: '>=3.10'
+  official: true
+  kind: cli
+  api_client: false
+  repo: https://github.com/amperity/chuck-data
+  homepage: https://chuckdata.ai
+  description: >-
+    Chuck Data - a text-based UI for data engineering across Databricks and AWS (Redshift + EMR) with
+    identity resolution powered by Amperity Stitch. Authenticates to Amperity via browser-based OAuth
+    (/login). It is Amperity tooling, not a client library for the Amperity REST API.
+- language: ruby
+  registry: homebrew
+  name: amperity/chuck-data
+  url: https://github.com/amperity/homebrew-chuck-data
+  install: brew tap amperity/chuck-data && brew install chuck-data
+  version: null
+  published: null
+  official: true
+  kind: cli-tap
+  api_client: false
+  note: >-
+    Homebrew tap for the chuck-data CLI. A tap formula has no registry metadata endpoint to query, so
+    version and published date are recorded as null rather than guessed; the installed version tracks
+    the PyPI release above.
+- language: clojure
+  registry: clojars
+  name: com.amperity/ken
+  url: https://clojars.org/com.amperity/ken
+  install: '[com.amperity/ken "2.1.59"]'
+  version: 2.1.59
+  published: null
+  official: true
+  kind: library
+  api_client: false
+  repo: https://github.com/amperity/ken
+  description: Observability library to instrument Clojure code.
+  note: >-
+    Clojars does not expose a per-artifact publish date on its search API, so published is null -
+    checked, nothing to record. The backing repo was last updated 2026-06-04.
+- language: clojure
+  registry: clojars
+  name: com.amperity/vault-clj
+  url: https://clojars.org/com.amperity/vault-clj
+  install: '[com.amperity/vault-clj "2.3.594"]'
+  version: 2.3.594
+  published: null
+  official: true
+  kind: library
+  api_client: false
+  repo: https://github.com/amperity/vault-clj
+  description: Clojure client for HashiCorp Vault secret management.
+  note: 'Clojars exposes no publish date; repo last updated 2026-07-17.'
+- language: clojure
+  registry: clojars
+  name: com.amperity/dialog
+  url: https://clojars.org/com.amperity/dialog
+  install: '[com.amperity/dialog "2.0.122"]'
+  version: 2.0.122
+  published: null
+  official: true
+  kind: library
+  api_client: false
+  repo: https://github.com/amperity/dialog
+  description: Just-enough logging library for Clojure.
+  note: 'Clojars exposes no publish date; repo last updated 2026-06-16.'
+- language: clojure
+  registry: clojars
+  name: amperity/sparkplug-core
+  url: https://clojars.org/amperity/sparkplug-core
+  install: '[amperity/sparkplug-core "1.1.0"]'
+  version: 1.1.0
+  published: null
+  official: true
+  kind: library
+  api_client: false
+  repo: https://github.com/amperity/sparkplug
+  description: Clojure API bindings for Apache Spark.
+  note: 'Clojars exposes no publish date; repo last updated 2025-06-26.'
+- language: clojure
+  registry: clojars
+  name: amperity/greenlight
+  url: https://clojars.org/amperity/greenlight
+  install: '[amperity/greenlight "0.8.0"]'
+  version: 0.8.0
+  published: null
+  official: true
+  kind: library
+  api_client: false
+  repo: https://github.com/amperity/greenlight
+  description: Clojure integration testing framework.
+  note: 'Clojars exposes no publish date; repo last updated 2026-03-02.'
+- language: python
+  registry: github
+  name: amperity-lambda-runner
+  url: https://github.com/amperity/amperity-lambda-runner
+  install: 'git clone https://github.com/amperity/amperity-lambda-runner'
+  version: null
+  published: null
+  official: true
+  kind: toolkit
+  api_client: false
+  description: >-
+    Amperity's open-source AWS Lambda toolkit - the reference template Amperity's own webhook
+    destination documentation points customers at for building custom destinations.
+  note: >-
+    Distributed only as a Git repository with no registry release, so there is no version metadata
+    endpoint to query. Repo last pushed 2023-09-08, which is the abandonment signal on this one.
+searched_registries:
+- {registry: npm, result: 'no first-party @amperity scope or amperity-* client package'}
+- {registry: pypi, result: 'chuck-data only; no Amperity API client'}
+- {registry: rubygems, result: none}
+- {registry: nuget, result: none}
+- {registry: 'maven central', result: none}
+- {registry: 'pkg.go.dev', result: none}
+- {registry: packagist, result: none}
+- {registry: crates.io, result: none}
+- {registry: clojars, result: 'large com.amperity/amperity estate of infra libraries; no API client'}

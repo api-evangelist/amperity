@@ -1,14 +1,30 @@
-generated: '2026-07-17'
+generated: '2026-08-13'
 method: searched
 source: https://docs.amperity.com/api/responses.html
+derived_from: openapi/amperity-control-plane-2024-04-01-openapi.json
+docs:
+- https://docs.amperity.com/api/responses.html
+- https://docs.amperity.com/operator/api_streaming.html
 format: proprietary-json
 rfc9457: false
+rfc9457_note: >-
+  Not RFC 9457. Responses are application/json carrying a bare object, not application/problem+json,
+  and there is no type URI, no instance and no problem registry. An agent gets a status code and a
+  human sentence.
 envelope:
+  schema: '#/components/schemas/ErrorResponse'
+  additional_properties: false
+  required: [status, message]
   fields:
-  - {name: status, description: numeric HTTP status code}
-  - {name: message, description: human-readable description}
-  - {name: request_id, description: optional Amperity request identifier}
-  - {name: trace_id, description: optional Amperity tracing identifier}
+  - {name: status, type: integer, required: true, description: The HTTP status code, spec_example: 400}
+  - {name: message, type: string, required: true, description: A description of the error, spec_example: An unexpected error occurred.}
+  - {name: request_id, type: string, required: false, description: Optional Amperity request identifier, source: docs}
+  - {name: trace_id, type: string, required: false, description: Optional Amperity tracing identifier, source: docs}
+  divergence_note: >-
+    The OpenAPI ErrorResponse schema sets additionalProperties:false and declares ONLY status and
+    message, while the documented error example on the responses page also returns request_id and
+    trace_id. The spec and the docs disagree; a strict client validating against the spec would reject
+    the response Amperity's own documentation shows. Recorded, not reconciled.
   example: |
     {
       "status": 400,
@@ -19,31 +35,83 @@ envelope:
 problems:
 - status: 400
   title: Bad request
-  remediation: Fix malformed request parameters or body; also returned for unsupported api-version values.
+  spec_description: 'Bad Request - the request was malformed or contained invalid parameters.'
+  component: '#/components/responses/BadRequest'
+  operations: 9
+  retryable: false
+  remediation: >-
+    Fix malformed request parameters or body. Also returned when the api-version header names an
+    unsupported or sunset version.
 - status: 401
   title: Authentication required
-  remediation: Provide a valid Bearer JWT access token in the Authorization header.
+  spec_description: 'Authentication Required - no valid Bearer token was provided.'
+  component: '#/components/responses/Unauthorized'
+  operations: 9
+  retryable: false
+  remediation: >-
+    Exchange the API key client_id/client_secret for an access token and send it as
+    'Authorization: Bearer ${access-token}'.
 - status: 403
   title: Not authorized
-  remediation: Ensure the API key/token has the required policy (e.g. DataGrid Operator) for the resource.
+  spec_description: 'Not Authorized - the API key does not have permission for this operation.'
+  component: '#/components/responses/Forbidden'
+  operations: 9
+  retryable: false
+  remediation: >-
+    Ensure the API key carries the required policy (e.g. DataGrid Operator) in the target tenant, and
+    that the Amperity-Tenant header names a tenant the key can reach.
 - status: 404
   title: Not found
-  remediation: Verify the resource id and tenant.
+  spec_description: 'Not Found - the requested resource does not exist.'
+  component: '#/components/responses/NotFound'
+  operations: 3
+  retryable: false
+  remediation: Verify the resource id and the Amperity-Tenant header.
 - status: 405
   title: Method not allowed
+  spec_description: Method Not Allowed.
+  component: '#/components/responses/MethodNotAllowed'
+  operations: 0
+  declared_but_unused: true
+  retryable: false
   remediation: Use a supported HTTP method for the endpoint.
 - status: 409
   title: Conflict
+  source: docs
+  in_spec: false
+  retryable: false
   remediation: Resolve the conflicting state before retrying.
 - status: 413
   title: Payload too large
-  remediation: Streaming API payloads must not exceed 1 MB.
+  source: https://docs.amperity.com/operator/api_streaming.html
+  in_spec: false
+  api: Amperity Streaming API
+  retryable: false
+  remediation: 'Streaming API payloads must not exceed 1 MB.'
 - status: 429
   title: Rate limit exceeded
-  remediation: Back off and retry; request a limit increase via Support if needed.
+  source: https://docs.amperity.com/api/rate_limits.html
+  in_spec: false
+  retryable: true
+  remediation: >-
+    Back off and retry. No Retry-After or RateLimit-* header is published, so the client must use its
+    own backoff schedule. See rate-limits/amperity-rate-limits.yml.
 - status: 500
   title: Server error
-  remediation: Retry later; contact Support with request_id/trace_id if it persists.
+  spec_description: 'Internal Server Error - an unexpected error occurred.'
+  component: '#/components/responses/InternalError'
+  operations: 9
+  retryable: true
+  remediation: Retry with backoff; contact Support with request_id/trace_id if it persists.
 - status: 503
   title: Service unavailable
-  remediation: Retry with backoff; check the status page.
+  source: docs
+  in_spec: false
+  retryable: true
+  remediation: 'Retry with backoff; check https://status.amperity.com.'
+coverage:
+  spec_declared: 6
+  docs_only: 4
+  operations_with_4xx: 9
+  operations_with_5xx: 9
+  in_spec_examples: 0

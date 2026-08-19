@@ -1,0 +1,65 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the Amperity API
+  version: 1.0.0
+extends: openapi/amperity-control-plane-2024-04-01-openapi.json
+x-generated: '2026-08-13'
+x-method: generated
+x-source: >-
+  Generated from the harvested Amperity OpenAPI plus the repo artifacts. Captures API Evangelist
+  enhancements only - the harvested spec is never mutated.
+actions:
+- target: $.info
+  update:
+    x-apievangelist-slug: amperity
+    x-apievangelist-artifacts:
+      authentication: authentication/amperity-authentication.yml
+      conventions: conventions/amperity-conventions.yml
+      errors: errors/amperity-problem-types.yml
+      lifecycle: lifecycle/amperity-lifecycle.yml
+      rate_limits: rate-limits/amperity-rate-limits.yml
+      data_model: data-model/amperity-data-model.yml
+      mcp: mcp/amperity-mcp.yml
+      tool_crosswalk: mcp/amperity-tool-crosswalk.yml
+      sandbox: sandbox/amperity-sandbox.yml
+      webhooks: asyncapi/amperity-webhooks.yml
+    x-apievangelist-notes:
+      idempotency: >-
+        No idempotency contract. POST /workflow/runs and POST /workflow/runs/{workflow-id}/stop are not
+        safely retryable.
+      rate_limit_headers: >-
+        None published. 10 rps on this API; exhaustion returns 429 with no Retry-After.
+      error_schema_divergence: >-
+        ErrorResponse sets additionalProperties:false and declares only status+message, but the docs
+        error example also returns request_id and trace_id.
+- target: $.info
+  update:
+    contact:
+      name: Amperity API documentation
+      url: https://docs.amperity.com/api/
+- target: $.servers
+  update:
+    x-apievangelist-server-note: >-
+      A third documented base URL exists for tenants hosted in Australia -
+      https://app-aws-apse2.amperity.com/api - which the spec does not declare. See
+      https://docs.amperity.com/api/base_url.html.
+- target: $.components.schemas.ErrorResponse
+  update:
+    x-apievangelist-divergence: >-
+      Amperity's own responses documentation shows request_id and trace_id in the error body, which
+      additionalProperties:false forbids. A strict validating client will reject a documented response.
+- target: $.paths['/workflow/runs'].post
+  update:
+    x-apievangelist-retry-safety: not-idempotent
+    x-apievangelist-note: >-
+      Starting a workflow has no idempotency key. A timed-out client that retries can start the same
+      courier group, orchestration group or campaign twice.
+- target: $.paths['/workflow/runs/{workflow-id}/stop'].post
+  update:
+    x-apievangelist-retry-safety: naturally-idempotent
+    x-apievangelist-note: 'Stopping an already-stopped workflow is a no-op on the target state.'
+- target: $.components.parameters.ApiVersionHeader
+  update:
+    x-apievangelist-note: >-
+      Date-string versioning under an RFC 8594 deprecation/sunset policy - at least 6 months notice,
+      at least 3 months between deprecation and sunset. An unsupported value returns 400.

@@ -1,4 +1,4 @@
-generated: '2026-07-17'
+generated: '2026-08-13'
 method: searched
 source: https://docs.amperity.com/api/authentication.html
 docs: https://docs.amperity.com/api/authentication.html
@@ -6,7 +6,14 @@ summary:
   types: [oauth2, http]
   http_scheme: bearer
   bearer_format: JWT
-  oauth2_flows: [clientCredentials]
+  oauth2_flows: [clientCredentials, authorizationCode]
+  surfaces: 2
+  surfaces_note: >-
+    Amperity runs TWO separate OAuth2 deployments with different flows, different token endpoints and
+    different identity models. The REST APIs use client-credentials against a tenant token endpoint and
+    authenticate a SYNTHETIC IDENTITY (an API key). The hosted MCP server uses authorization-code with
+    PKCE against mcp.amperity.com and authenticates a REAL HUMAN USER, scoping every request to that
+    user's identity, tenant and permissions. They are not interchangeable.
 overview: >-
   Amperity APIs authenticate with a JWT bearer access token. An administrator creates an API key
   (a synthetic identity bound to the tenant) under Settings > Security > API keys, granting it the
@@ -56,3 +63,40 @@ token_lifecycle:
 notes:
 - API keys are managed under Settings > Security and require the API key administration policy.
 - The Streaming API uses a self-managed Streaming Ingest JWT token generated in the UI.
+mcp_oauth:
+  surface: https://mcp.amperity.com
+  method: probed
+  source: well-known/amperity-oauth-authorization-server.json
+  checked: '2026-08-13'
+  type: oauth2
+  flow: authorization_code
+  pkce: S256
+  issuer: https://mcp.amperity.com
+  authorization_endpoint: https://mcp.amperity.com/authorize
+  token_endpoint: https://mcp.amperity.com/oauth/token
+  registration_endpoint: https://mcp.amperity.com/oauth/register
+  response_types_supported: [code]
+  grant_types_supported: [authorization_code]
+  token_endpoint_auth_methods_supported: [none]
+  bearer_methods_supported: [header]
+  dynamic_client_registration: true
+  published_client_id: nwbd0MGCyh1VysmYQM05UoDXIuVPdGEs
+  published_client_id_note: >-
+    Amperity publishes this public client id verbatim in its Claude setup documentation for use when
+    adding the custom connector. It is a public client (token_endpoint_auth_methods_supported: [none]),
+    not a secret.
+  challenge:
+    observed: 'HTTP 401 on POST tools/list'
+    www_authenticate: 'Bearer resource_metadata="https://mcp.amperity.com/.well-known/oauth-protected-resource"'
+    note: 'Full RFC 9728 protected-resource handshake - the 401 points a client at its own metadata.'
+  scopes:
+    published: []
+    note: >-
+      No scopes_supported is advertised in the authorization-server metadata and no scope reference
+      page exists. Authorization is carried by the calling user's Amperity policies and by the
+      per-session MCP safety mode, not by OAuth scopes. This is why no scopes/ artifact is emitted for
+      Amperity - there is no scope surface to record.
+  authorization_model:
+    basis: 'The calling user''s Amperity identity, tenant access and policies.'
+    session_guardrail: 'Per-session MCP safety mode (strict / confirm / unrestricted).'
+    ref: mcp/amperity-mcp.yml

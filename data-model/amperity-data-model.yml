@@ -1,63 +1,152 @@
-generated: '2026-07-17'
-method: searched
-source: https://docs.amperity.com/reference/api.html
+generated: '2026-08-13'
+method: derived
+source: openapi/amperity-control-plane-2024-04-01-openapi.json
+also_from:
+- openapi/amperity-control-plane-unstable-openapi.json
+- https://docs.amperity.com/operator/api_profile.html
+- https://docs.amperity.com/operator/api_streaming.html
+- https://docs.amperity.com/api/mcp_tool_reference.html
+checked: '2026-08-13'
 note: >-
-  Entity graph derived from the documented Amperity API and Profile API resources (no downloadable
-  OpenAPI is published — the docs site is a rendered SPA). Relationships are conservative, based on the
-  documented endpoint paths.
+  Entity graph derived from the 16 component schemas in Amperity's published OpenAPI, plus the Profile
+  and Streaming API docs (which have no downloadable spec) and the MCP tool reference. The REST spec
+  covers five resource families; the MCP tool surface reveals a much larger internal object model
+  (databases, core tables, domain transforms, couriers, feeds, destinations, orchestrations, journeys,
+  slices, prediction models, labels) that has no REST representation - those are listed under
+  mcp_only_entities so the gap is visible rather than silently missing.
+list_envelope:
+  shape: '{data: [...], next_token: string, total: integer}'
+  schemas: [AuditEventList, CampaignList, SegmentList, IngestJobDetailsList, WorkflowList]
+  note: 'Every REST list schema is the same three-field envelope. Reuse is real, not incidental.'
 entities:
 - name: Tenant
-  description: An Amperity tenant; the top-level container all resources belong to. Identified via the X-Amperity-Tenant / amperity-tenant header.
-- name: Index
-  description: A profile index containing unified customer profiles.
-  api: Profile API
-  operations: ['GET /indexes', 'GET /indexes/{id}']
-- name: Profile
-  description: A unified customer profile (Customer 360) within an index.
-  api: Profile API
-  operations: ['GET /indexes/{id}/profiles', 'GET /indexes/{id}/profiles/{id}']
+  description: >-
+    The top-level container every resource belongs to. Never a REST resource - it is a request
+    dimension carried in the Amperity-Tenant header. A sandbox is a distinct tenant with its own id.
+  api: all
+  schema: null
+- name: AuditEvent
+  description: A record of user activity in the tenant.
+  api: Amperity API
+  schema: AuditEvent
+  operations: [list-events]
+  fields: [event_id, event_type, tenant, tenant_family, happened_at, principal_id, principal_name,
+    principal_email, object_id, object_name, origin_ip, user_agent, session_id]
+  id_field: event_id
 - name: Campaign
   description: A marketing campaign.
   api: Amperity API
-  operations: [GET /campaigns]
+  schema: Campaign
+  operations: [list-campaign]
+  fields: [id, name, deliver_at]
+  id_field: id
+  note: 'Read-only over REST (list only). Full CRUD exists only on the MCP surface.'
 - name: CampaignDraft
   description: A draft campaign.
-  api: Amperity API
-  operations: [GET /campaign-drafts]
+  api: Amperity API (unstable)
+  schema: null
+  operations: [list-campaign-draft]
+  note: 'Present only in the unstable spec; it returns CampaignList, so a draft is shaped as a Campaign.'
 - name: Segment
   description: An audience segment.
   api: Amperity API
-  operations: [GET /segments]
+  schema: Segment
+  operations: [list-segment]
+  fields: [id, name, status]
+  id_field: id
+  note: 'Read-only over REST. Called "iq" on the MCP surface.'
 - name: IngestJob
-  description: A data ingestion job.
+  description: A data ingestion job for a tenant.
   api: Amperity API
-  operations: ['GET /ingest/jobs', 'GET /ingest/jobs/{id}']
-- name: WorkflowRun
-  description: An execution of an Amperity workflow.
+  schema: IngestJobDetails
+  operations: [list-ingest-jobs, get-ingest-job]
+  fields: [id, workflow_id, tables]
+  id_field: id
+- name: IngestFeedDetails
+  description: One table's worth of an ingest job - the per-feed detail record inside a job.
   api: Amperity API
-  operations: ['GET /workflow/runs', 'GET /workflow/runs/{id}', 'POST /workflow/runs', 'POST /workflow/runs/{id}/stop']
-- name: AuditEvent
-  description: A tenant audit-log event.
+  schema: IngestFeedDetails
+  fields: [feed_id, job_id, table_name, state, read, errors, rejected, inserted, updated, started_at,
+    ended_at, files]
+  id_field: feed_id
+- name: IngestFileDetails
+  description: One source file inside a feed.
   api: Amperity API
-  operations: [GET /audit-events]
+  schema: IngestFileDetails
+  fields: [file_id, name, read, errors]
+  id_field: file_id
+- name: Workflow
+  description: >-
+    An execution of Amperity work. The generic runner - starting a workflow is how you run a courier
+    group, an orchestration group or a campaign.
+  api: Amperity API
+  schema: Workflow
+  operations: [list-workflows, get-workflow, run-workflow, stop-workflow]
+  fields: [id, state, type, name, tenant, created_at, ended_at, principal_id, principal_name,
+    principal_email, launched_version, current_version, warn_after_ms, task_instances, error]
+  id_field: id
+- name: WorkflowTaskInstance
+  description: One task inside a workflow run.
+  api: Amperity API
+  schema: WorkflowTaskInstance
+  fields: [id, state, tenant, created_at, ended_at, execution_type, label, run_id, state_changed_at,
+    task_definition_id, task_definition_type, timeout_ms, workflow_id, error]
+  id_field: id
+- name: WorkflowError
+  description: Structured failure detail attached to a workflow or a task instance.
+  api: Amperity API
+  schema: WorkflowError
+  fields: [type, message, attribution, data]
+- name: WorkflowRunRequest
+  description: The request body that starts a workflow.
+  api: Amperity API
+  schema: WorkflowRunRequest
+  fields: [config_id, range_from, range_to, run_mode]
+  note: 'config_id names the courier group / orchestration group / campaign to run.'
+- name: Index
+  description: A profile index containing unified customer profiles.
+  api: Profile API
+  schema: null
+  operations: ['GET /indexes', 'GET /indexes/{id}']
+  note: 'No published OpenAPI for the Profile API; shape taken from the docs.'
+- name: Profile
+  description: A unified customer profile (Customer 360) within an index.
+  api: Profile API
+  schema: null
+  operations: ['GET /indexes/{id}/profiles', 'GET /indexes/{id}/profiles/{id}']
 - name: Stream
-  description: A tenant-specific data stream that accepts real-time ingestion.
+  description: A tenant-specific stream that accepts real-time event ingestion.
   api: Streaming API
+  schema: null
   operations: ['POST /stream/v0/data/{stream-id}']
 relationships:
-- from: Index
-  to: Profile
-  type: has_many
-  via: index id path segment
-- from: Profile
-  to: Index
-  type: belongs_to
-  via: 'id in /indexes/{id}/profiles'
-- from: CampaignDraft
-  to: Campaign
-  type: has_one
-  via: draft promoted to campaign
-- from: Tenant
-  to: [Index, Campaign, Segment, IngestJob, WorkflowRun, AuditEvent, Stream]
-  type: has_many
-  via: tenant header scoping
+- {from: Tenant, to: AuditEvent, type: has_many, via: 'Amperity-Tenant header'}
+- {from: Tenant, to: Campaign, type: has_many, via: 'Amperity-Tenant header'}
+- {from: Tenant, to: Segment, type: has_many, via: 'Amperity-Tenant header'}
+- {from: Tenant, to: IngestJob, type: has_many, via: 'Amperity-Tenant header'}
+- {from: Tenant, to: Workflow, type: has_many, via: 'Amperity-Tenant header (Workflow.tenant)'}
+- {from: Tenant, to: Index, type: has_many, via: 'amperity-tenant header'}
+- {from: Tenant, to: Stream, type: has_many, via: 'X-Amperity-Tenant header'}
+- {from: IngestJob, to: Workflow, type: belongs_to, via: workflow_id}
+- {from: IngestJob, to: IngestFeedDetails, type: has_many, via: 'tables[]'}
+- {from: IngestFeedDetails, to: IngestJob, type: belongs_to, via: job_id}
+- {from: IngestFeedDetails, to: IngestFileDetails, type: has_many, via: 'files[]'}
+- {from: Workflow, to: WorkflowTaskInstance, type: has_many, via: 'task_instances[]'}
+- {from: WorkflowTaskInstance, to: Workflow, type: belongs_to, via: workflow_id}
+- {from: Workflow, to: WorkflowError, type: has_one, via: error}
+- {from: WorkflowTaskInstance, to: WorkflowError, type: has_one, via: error}
+- {from: WorkflowRunRequest, to: Workflow, type: has_one, via: 'config_id names the campaign / courier group / orchestration group to run'}
+- {from: CampaignDraft, to: Campaign, type: has_one, via: 'draft promoted to campaign'}
+- {from: Index, to: Profile, type: has_many, via: '/indexes/{id}/profiles'}
+- {from: Profile, to: Index, type: belongs_to, via: 'index id path segment'}
+- {from: AuditEvent, to: Tenant, type: belongs_to, via: 'tenant / tenant_family'}
+mcp_only_entities:
+  note: >-
+    Named in the MCP tool reference with no REST representation in either published spec. Listed as
+    entity names only - no field lists, because the MCP tools/list schemas are OAuth-gated.
+  entities: [Database, DatabaseTable, Dataset, CoreTable, DomainTransform, Query, QueryFolder,
+    StitchReport, StitchBenchmark, Bridge, BridgeShare, Courier, CourierGroup, Feed, Source,
+    Destination, DestinationTargetTemplate, Orchestration, OrchestrationGroup, CampaignFolder,
+    Journey, JourneyVersion, Slice, PredictionModel, PredictionModelConfig, Label, User, Policy,
+    ContextDocument, AlertSubscription, SparkApplication, ConfigVersionNode]
+  ref: mcp/amperity-tool-crosswalk.yml

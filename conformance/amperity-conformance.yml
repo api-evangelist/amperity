@@ -1,22 +1,114 @@
-generated: '2026-07-17'
+generated: '2026-08-13'
 method: searched
 source: https://docs.amperity.com/api/authentication.html
+also_from:
+- openapi/amperity-control-plane-2024-04-01-openapi.json
+- well-known/amperity-oauth-authorization-server.json
+- well-known/amperity-oauth-protected-resource.json
+checked: '2026-08-13'
 standards:
+- id: openapi-3.0
+  conforms: true
+  evidence: >-
+    Amperity publishes two OpenAPI 3.0.3 documents at
+    https://docs.amperity.com/downloads/openapi/control-plane-2024-04-01-openapi.json (stable) and
+    .../control-plane-unstable-openapi.json (unstable preview), linked from its own API overview page
+    and rendered in-docs with RapiDoc.
+- id: openapi-3.1
+  conforms: false
+  evidence: 'Both documents declare openapi: 3.0.3.'
 - id: oauth2
   conforms: true
-  evidence: OAuth2 client-credentials token endpoint (POST /api/v0/oauth2/token) issues JWT bearer tokens.
+  evidence: >-
+    Two distinct OAuth2 deployments. (1) REST: client-credentials token endpoint
+    POST /api/v0/oauth2/token issuing JWT bearer tokens. (2) MCP: authorization-code flow with an
+    authorization_endpoint, token_endpoint and registration_endpoint advertised at
+    https://mcp.amperity.com/.well-known/oauth-authorization-server.
+- id: rfc8414-authorization-server-metadata
+  conforms: true
+  evidence: >-
+    https://mcp.amperity.com/.well-known/oauth-authorization-server returns 200 with issuer,
+    authorization_endpoint, token_endpoint, registration_endpoint, response_types_supported,
+    grant_types_supported and code_challenge_methods_supported.
+- id: rfc9728-protected-resource-metadata
+  conforms: true
+  evidence: >-
+    https://mcp.amperity.com/.well-known/oauth-protected-resource returns 200 with resource,
+    authorization_servers and bearer_methods_supported, and the MCP endpoint's 401 carries
+    'www-authenticate: Bearer resource_metadata="..."' pointing at it - the full RFC 9728 handshake.
+- id: rfc7636-pkce
+  conforms: true
+  evidence: 'code_challenge_methods_supported: ["S256"] in the authorization-server metadata.'
+- id: rfc7591-dynamic-client-registration
+  conforms: true
+  evidence: 'registration_endpoint https://mcp.amperity.com/oauth/register is advertised.'
 - id: jwt
   conforms: true
-  evidence: Access tokens are JSON Web Tokens (JWT) presented as Bearer credentials.
-- id: rfc8594-deprecation-sunset
-  conforms: true
-  evidence: Versioning policy uses Deprecation and Sunset HTTP headers with >=6 months notice.
-- id: rfc9457-problem-details
-  conforms: false
-  evidence: Error envelope is a proprietary JSON object (status/message/request_id/trace_id), not application/problem+json.
+  evidence: 'REST access tokens are JSON Web Tokens presented as Bearer credentials.'
 - id: oidc
   conforms: false
-  evidence: No /.well-known/openid-configuration (404); no OIDC discovery published.
-- id: pagination
+  evidence: >-
+    https://mcp.amperity.com/.well-known/openid-configuration returns 200 but its body is byte-identical
+    to the OAuth authorization-server metadata - no jwks_uri, no userinfo_endpoint, no
+    subject_types_supported, no id_token_signing_alg_values_supported. It is OAuth metadata served at
+    the OIDC path, not an OIDC provider. app.amperity.com returns 404 for the same path.
+- id: mcp
   conforms: true
-  evidence: List endpoints (e.g. GET /indexes/{id}/profiles) return paginated results.
+  evidence: >-
+    Amperity hosts an official remote MCP server at https://mcp.amperity.com over streamable HTTP, with
+    227 documented tools, a published tool reference, per-session safety modes and setup guides for
+    Claude, ChatGPT, Copilot Studio, Gemini and Snowflake Cortex Agents.
+- id: a2a
+  conforms: false
+  evidence: >-
+    No A2A agent card. /.well-known/agent-card.json and /.well-known/agent.json probed on
+    mcp.amperity.com (401), app.amperity.com (404), docs.amperity.com (soft-404 HTML shell) and
+    www.amperity.com (403 bot challenge).
+- id: llmstxt
+  conforms: true
+  evidence: >-
+    Amperity serves a real https://docs.amperity.com/llms.txt indexing twelve section-scoped llms.txt
+    files, plus markdown twins of every docs page at /md/<path>.md.
+- id: rfc8594-deprecation-sunset
+  conforms: true
+  evidence: >-
+    The versioning policy commits to Deprecation and Sunset HTTP headers with at least 6 months notice
+    and at least 3 months between deprecation and sunset.
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: >-
+    Errors are application/json with a bare {status, message} object (plus request_id/trace_id in the
+    docs example), not application/problem+json. No type URI, no problem registry.
+- id: cursor-pagination
+  conforms: true
+  evidence: >-
+    Every GET endpoint takes limit / next_token / with_total and returns data / next_token / total.
+    Declared as reusable components (Limit, NextToken, WithTotal) in the OpenAPI.
+- id: idempotency
+  conforms: false
+  evidence: >-
+    No idempotency-key header, no dedupe window, and no Idempotency-Key parameter on either write
+    operation in the spec. POST /workflow/runs is not safely retryable.
+- id: rate-limit-headers
+  conforms: false
+  evidence: >-
+    Limits are published as prose numbers only. No X-RateLimit-*, no RateLimit-*, no Retry-After in the
+    docs or the spec.
+- id: asyncapi
+  conforms: false
+  evidence: >-
+    No AsyncAPI document published. The event surface is a single webhook-destination callback into a
+    customer-hosted AWS Lambda; see asyncapi/amperity-webhooks.yml.
+- id: json-schema
+  conforms: true
+  evidence: '16 reusable components.schemas in the stable spec (18 in unstable), referenced by $ref.'
+compliance_program:
+  published: true
+  url: https://trust.amperity.com/
+  platform: Vanta Trust Center
+  covers: [security, privacy, compliance, governance]
+  certifications: []
+  note: >-
+    Amperity publishes a trust center covering its security, privacy, compliance and governance
+    practices. The specific certifications are rendered client-side and could not be read from the
+    static response, so none is asserted here. See security/amperity-trust-center.yml.

@@ -1,22 +1,86 @@
-generated: '2026-07-17'
+generated: '2026-08-13'
 method: searched
-source: live probes of /.well-known/ on Amperity hosts
+source: live probes of /.well-known/ on every Amperity host in apis.yml plus the MCP host
+checked: '2026-08-13'
+summary:
+  real_documents: 3
+  hosts_probed: 4
+  note: >-
+    The Amperity MCP host serves three real, parsing discovery documents - RFC 8414 OAuth
+    authorization-server metadata, RFC 9728 OAuth protected-resource metadata, and an OIDC-shaped
+    configuration document. No other Amperity host publishes anything at /.well-known/.
 hosts:
+- host: https://mcp.amperity.com
+  documents:
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    content_type: application/json
+    file: amperity-oauth-authorization-server.json
+    spec: RFC 8414
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    content_type: application/json
+    file: amperity-oauth-protected-resource.json
+    spec: RFC 9728
+  - path: /.well-known/openid-configuration
+    status: 200
+    content_type: application/json
+    file: amperity-openid-configuration.json
+    note: >-
+      Byte-identical to the oauth-authorization-server document; it is OAuth 2.1 authorization-server
+      metadata served at the OIDC path, not a full OIDC provider configuration (no jwks_uri,
+      userinfo_endpoint, subject_types_supported or id_token signing algorithms).
+  - path: /.well-known/agent-card.json
+    status: 401
+    note: 'Auth-gated catch-all, not an A2A card. No agent card is published.'
+  - path: /.well-known/agent.json
+    status: 401
+    note: 'Auth-gated catch-all, not an A2A card.'
+  - path: /.well-known/security.txt
+    status: 401
 - host: https://app.amperity.com
   documents:
   - path: /.well-known/oauth-authorization-server
     status: 404
   - path: /.well-known/openid-configuration
     status: 404
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
 - host: https://www.amperity.com
   documents:
   - path: /.well-known/security.txt
     status: 403
+    note: >-
+      The marketing site sits behind a Vercel Security Checkpoint bot challenge that answers 403/429 to
+      every non-browser request, so absence here is not established - only unreachability.
+  - path: /.well-known/agent-card.json
+    status: 403
+  - path: /.well-known/agent.json
+    status: 403
 - host: https://docs.amperity.com
   documents:
   - path: /.well-known/security.txt
-    status: 404   # host returns HTTP 200 for unknown paths but serves the docs 404 page (no security.txt)
-notes: >-
-  No machine-readable /.well-known/ discovery documents (OAuth authorization-server metadata, OIDC
-  configuration, or RFC 9116 security.txt) are published on the Amperity API or website hosts. Absence
-  recorded as valid data.
+    status: 200
+    note: >-
+      SOFT 404. The Sphinx docs host answers HTTP 200 with its HTML 404 page for every unknown path.
+      Body is <!DOCTYPE html>, not a document. Treated as a miss.
+  - path: /.well-known/agent-card.json
+    status: 200
+    note: 'SOFT 404 - same HTML shell. Not an agent card.'
+  - path: /.well-known/agent.json
+    status: 200
+    note: 'SOFT 404 - same HTML shell. Not an agent card.'
+  - path: /.well-known/api-catalog
+    status: 200
+    note: 'SOFT 404 - same HTML shell.'
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    note: 'SOFT 404 - same HTML shell.'
