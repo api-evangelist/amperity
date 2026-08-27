@@ -54,82 +54,14 @@ tags:
 - Retail
 - Identity
 apis:
-- name: Amperity API
-  description: >-
-    RESTful API for programmatic access to an Amperity tenant — list and manage campaigns, campaign
-    drafts, segments, ingest jobs, audit events, and workflow runs. Authenticated with an OAuth2
-    client-credentials JWT bearer token and versioned via a date-based api-version header.
-  humanURL: https://docs.amperity.com/api/overview.html
-  baseURL: https://app.amperity.com/api
-  tags:
-  - Amperity API
-  - Campaigns
-  - Segments
-  - Workflows
-  - Ingest
-  properties:
-  - type: Documentation
-    url: https://docs.amperity.com/api/overview.html
-  - type: APIReference
-    url: https://docs.amperity.com/reference/api.html
-  - type: Authentication
-    url: authentication/amperity-authentication.yml
-  - type: Conventions
-    url: conventions/amperity-conventions.yml
-  - type: ErrorCatalog
-    url: errors/amperity-problem-types.yml
-  - type: Lifecycle
-    url: lifecycle/amperity-lifecycle.yml
-  - type: ChangeLog
-    url: changelog/amperity-changelog.yml
-  - type: Conformance
-    url: conformance/amperity-conformance.yml
-  - type: DataModel
-    url: data-model/amperity-data-model.yml
-  - type: MCPServer
-    url: mcp/amperity-mcp.yml
-  - type: OpenAPI
-    url: openapi/amperity-control-plane-2024-04-01-openapi.json
-  - type: Overlay
-    url: overlays/amperity-control-plane-overlay.yaml
-  - type: RateLimits
-    url: rate-limits/amperity-rate-limits.yml
-  - type: Sandbox
-    url: sandbox/amperity-sandbox.yml
-  - type: AgentSkill
-    url: skills/_index.yml
-  - type: AgenticAccess
-    url: agentic-access/amperity-agentic-access.yml
-  - type: Webhooks
-    url: asyncapi/amperity-webhooks.yml
-  - type: ToolCrosswalk
-    url: mcp/amperity-tool-crosswalk.yml
-- name: Amperity API (Unstable)
-  description: >-
-    Amperity's preview track for the Amperity API, published as a separate OpenAPI document alongside
-    the stable 2024-04-01 spec. Currently adds GET /campaign-drafts on top of the stable operation set.
-    Same base URL, same bearer auth, same required headers; the api-version header takes the value
-    "unstable".
-  humanURL: https://docs.amperity.com/api/openapi-unstable.html
-  baseURL: https://app.amperity.com/api
-  tags:
-  - Amperity API
-  - Unstable
-  - Preview
-  properties:
-  - type: OpenAPI
-    url: openapi/amperity-control-plane-unstable-openapi.json
-  - type: Documentation
-    url: https://docs.amperity.com/api/openapi-unstable.html
 - name: Amperity MCP Server
   description: >-
-    Amperity's official hosted remote Model Context Protocol server. A single public endpoint at
-    https://mcp.amperity.com routes each request to the Amperity stack holding the calling user's
-    tenant, and exposes more than 200 tools across databases, queries, Stitch identity resolution,
-    couriers and feeds, destinations, orchestrations, campaigns and journeys, predictive models and
-    Spark. Authenticates with OAuth2 authorization-code + PKCE against the user's own Amperity
-    credentials, with per-user isolation and per-session safety modes gating writes to production
-    tenants. Wider than the REST API by two orders of magnitude.
+    Amperity's official hosted remote Model Context Protocol server. A single public endpoint at https://mcp.amperity.com
+    routes each request to the Amperity stack holding the calling user's tenant, and exposes more than
+    200 tools across databases, queries, Stitch identity resolution, couriers and feeds, destinations,
+    orchestrations, campaigns and journeys, predictive models and Spark. Authenticates with OAuth2 authorization-code
+    + PKCE against the user's own Amperity credentials, with per-user isolation and per-session safety
+    modes gating writes to production tenants. Wider than the REST API by two orders of magnitude.
   humanURL: https://docs.amperity.com/api/mcp_overview.html
   baseURL: https://mcp.amperity.com
   tags:
@@ -159,9 +91,9 @@ apis:
     url: well-known/amperity-well-known.yml
 - name: Amperity Profile API
   description: >-
-    RESTful API for real-time access to unified customer profiles. List indexes, fetch an index, and
-    read paginated customer profiles (or a single profile) for personalization and downstream
-    activation. JWT bearer auth with amperity-tenant and api-version headers.
+    RESTful API for real-time access to unified customer profiles. List indexes, fetch an index, and read
+    paginated customer profiles (or a single profile) for personalization and downstream activation. JWT
+    bearer auth with amperity-tenant and api-version headers.
   humanURL: https://docs.amperity.com/operator/api_profile.html
   baseURL: https://app.amperity.com/api
   tags:
@@ -198,6 +130,206 @@ apis:
     url: rate-limits/amperity-rate-limits.yml
   - type: Webhooks
     url: asyncapi/amperity-webhooks.yml
+- aid: amperity:amperity-audit-events-api
+  name: Amperity Audit Events API
+  description: Return records for user activity that occurred in your tenant.
+  humanURL: https://docs.amperity.com/api/overview.html
+  baseURL: https://app.amperity.com/api
+  tags:
+  - Audit Events
+  properties:
+  - type: OpenAPI
+    url: openapi/amperity-audit-events-api-openapi.yml
+  - type: Documentation
+    url: https://docs.amperity.com/api/overview.html
+  - type: APIReference
+    url: https://docs.amperity.com/reference/api.html
+  - type: Authentication
+    url: authentication/amperity-authentication.yml
+  - type: Conventions
+    url: conventions/amperity-conventions.yml
+  - type: ErrorCatalog
+    url: errors/amperity-problem-types.yml
+  - type: Lifecycle
+    url: lifecycle/amperity-lifecycle.yml
+  - type: ChangeLog
+    url: changelog/amperity-changelog.yml
+  - type: Conformance
+    url: conformance/amperity-conformance.yml
+  - type: DataModel
+    url: data-model/amperity-data-model.yml
+  - type: RateLimits
+    url: rate-limits/amperity-rate-limits.yml
+  - type: Sandbox
+    url: sandbox/amperity-sandbox.yml
+  - type: AgenticAccess
+    url: agentic-access/amperity-agentic-access.yml
+  - type: Webhooks
+    url: asyncapi/amperity-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/amperity-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs.amperity.com/api/openapi-unstable.html
+- aid: amperity:amperity-campaigns-api
+  name: Amperity Campaigns API
+  description: Return information about campaigns and campaign drafts.
+  humanURL: https://docs.amperity.com/api/overview.html
+  baseURL: https://app.amperity.com/api
+  tags:
+  - Campaigns
+  properties:
+  - type: OpenAPI
+    url: openapi/amperity-campaigns-api-openapi.yml
+  - type: Documentation
+    url: https://docs.amperity.com/api/overview.html
+  - type: APIReference
+    url: https://docs.amperity.com/reference/api.html
+  - type: Authentication
+    url: authentication/amperity-authentication.yml
+  - type: Conventions
+    url: conventions/amperity-conventions.yml
+  - type: ErrorCatalog
+    url: errors/amperity-problem-types.yml
+  - type: Lifecycle
+    url: lifecycle/amperity-lifecycle.yml
+  - type: ChangeLog
+    url: changelog/amperity-changelog.yml
+  - type: Conformance
+    url: conformance/amperity-conformance.yml
+  - type: DataModel
+    url: data-model/amperity-data-model.yml
+  - type: RateLimits
+    url: rate-limits/amperity-rate-limits.yml
+  - type: Sandbox
+    url: sandbox/amperity-sandbox.yml
+  - type: AgenticAccess
+    url: agentic-access/amperity-agentic-access.yml
+  - type: Webhooks
+    url: asyncapi/amperity-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/amperity-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs.amperity.com/api/openapi-unstable.html
+- aid: amperity:amperity-ingest-api
+  name: Amperity Ingest API
+  description: Return details about ingest jobs.
+  humanURL: https://docs.amperity.com/api/overview.html
+  baseURL: https://app.amperity.com/api
+  tags:
+  - Ingest
+  properties:
+  - type: OpenAPI
+    url: openapi/amperity-ingest-api-openapi.yml
+  - type: Documentation
+    url: https://docs.amperity.com/api/overview.html
+  - type: APIReference
+    url: https://docs.amperity.com/reference/api.html
+  - type: Authentication
+    url: authentication/amperity-authentication.yml
+  - type: Conventions
+    url: conventions/amperity-conventions.yml
+  - type: ErrorCatalog
+    url: errors/amperity-problem-types.yml
+  - type: Lifecycle
+    url: lifecycle/amperity-lifecycle.yml
+  - type: ChangeLog
+    url: changelog/amperity-changelog.yml
+  - type: Conformance
+    url: conformance/amperity-conformance.yml
+  - type: DataModel
+    url: data-model/amperity-data-model.yml
+  - type: RateLimits
+    url: rate-limits/amperity-rate-limits.yml
+  - type: Sandbox
+    url: sandbox/amperity-sandbox.yml
+  - type: AgenticAccess
+    url: agentic-access/amperity-agentic-access.yml
+  - type: Webhooks
+    url: asyncapi/amperity-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/amperity-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs.amperity.com/api/openapi-unstable.html
+- aid: amperity:amperity-segments-api
+  name: Amperity Segments API
+  description: Return a list of segments available in your tenant.
+  humanURL: https://docs.amperity.com/api/overview.html
+  baseURL: https://app.amperity.com/api
+  tags:
+  - Segments
+  properties:
+  - type: OpenAPI
+    url: openapi/amperity-segments-api-openapi.yml
+  - type: Documentation
+    url: https://docs.amperity.com/api/overview.html
+  - type: APIReference
+    url: https://docs.amperity.com/reference/api.html
+  - type: Authentication
+    url: authentication/amperity-authentication.yml
+  - type: Conventions
+    url: conventions/amperity-conventions.yml
+  - type: ErrorCatalog
+    url: errors/amperity-problem-types.yml
+  - type: Lifecycle
+    url: lifecycle/amperity-lifecycle.yml
+  - type: ChangeLog
+    url: changelog/amperity-changelog.yml
+  - type: Conformance
+    url: conformance/amperity-conformance.yml
+  - type: DataModel
+    url: data-model/amperity-data-model.yml
+  - type: RateLimits
+    url: rate-limits/amperity-rate-limits.yml
+  - type: Sandbox
+    url: sandbox/amperity-sandbox.yml
+  - type: AgenticAccess
+    url: agentic-access/amperity-agentic-access.yml
+  - type: Webhooks
+    url: asyncapi/amperity-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/amperity-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs.amperity.com/api/openapi-unstable.html
+- aid: amperity:amperity-workflow-api
+  name: Amperity Workflow API
+  description: List, run, and stop workflows.
+  humanURL: https://docs.amperity.com/api/overview.html
+  baseURL: https://app.amperity.com/api
+  tags:
+  - Workflow
+  properties:
+  - type: OpenAPI
+    url: openapi/amperity-workflow-api-openapi.yml
+  - type: Documentation
+    url: https://docs.amperity.com/api/overview.html
+  - type: APIReference
+    url: https://docs.amperity.com/reference/api.html
+  - type: Authentication
+    url: authentication/amperity-authentication.yml
+  - type: Conventions
+    url: conventions/amperity-conventions.yml
+  - type: ErrorCatalog
+    url: errors/amperity-problem-types.yml
+  - type: Lifecycle
+    url: lifecycle/amperity-lifecycle.yml
+  - type: ChangeLog
+    url: changelog/amperity-changelog.yml
+  - type: Conformance
+    url: conformance/amperity-conformance.yml
+  - type: DataModel
+    url: data-model/amperity-data-model.yml
+  - type: RateLimits
+    url: rate-limits/amperity-rate-limits.yml
+  - type: Sandbox
+    url: sandbox/amperity-sandbox.yml
+  - type: AgenticAccess
+    url: agentic-access/amperity-agentic-access.yml
+  - type: Webhooks
+    url: asyncapi/amperity-webhooks.yml
+  - type: ToolCrosswalk
+    url: mcp/amperity-tool-crosswalk.yml
+  - type: Documentation
+    url: https://docs.amperity.com/api/openapi-unstable.html
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
