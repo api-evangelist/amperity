@@ -1,0 +1,25 @@
+slug: amperity
+provider: Amperity
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Retail & Consumer Goods
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 1
+edges:
+- tag: Segments
+  spec_file: amperity-segments-api-openapi.yml
+  capability_id: BC-420.20
+  capability_id_l1: BC-420
+  capability_name: Customer Segmentation Management
+  confidence: 0.8
+  evidence: 'GET /segments list-segment; schemas SegmentList, Segment; vendor: ''a durable Customer 360
+    that powers segmentation'''
+  reason: Segments in a customer data platform are customer segments used for targeting and treatment
+    — customer segmentation management.
