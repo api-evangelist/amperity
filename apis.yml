@@ -308,6 +308,8 @@ apis:
   humanURL: https://docs.amperity.com/api/overview.html
   baseURL: https://app.amperity.com/api
   tags:
+  - Workflows
+  tags_raw:
   - Workflow
   properties:
   - type: OpenAPI
