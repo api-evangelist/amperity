@@ -1,0 +1,786 @@
+openapi: 3.2.0
+info:
+  title: Amperity Workflow API
+  contact:
+    url: https://docs.amperity.com/api/
+  version: '1.0'
+  description: 'Operations tagged Workflow across 2 of this provider''s published API definitions: amperity-control-plane-2024-04-01-openapi.json, amperity-control-plane-unstable-openapi.json. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://app.amperity.com/api
+  description: Amazon AWS
+- url: https://<tenant-id>.amperity.com/api
+  description: Microsoft Azure
+  variables:
+    tenant-id:
+      default: your-tenant-id
+      description: Your Amperity tenant ID.
+security:
+- BearerAuth: []
+tags:
+- name: Workflow
+  description: List, run, and stop workflows.
+paths:
+  /workflow/runs:
+    get:
+      tags:
+      - Workflow
+      summary: GET /workflow/runs
+      operationId: list-workflows
+      description: 'Use the **GET /workflow/runs** endpoint to return a list of workflows that exist within
+
+        the date range defined in the request.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/ApiVersionHeader'
+      - $ref: '#/components/parameters/AmperityTenant'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/NextToken'
+      - $ref: '#/components/parameters/WithTotal'
+      - name: created_from
+        in: query
+        required: false
+        description: 'A timestamp that defines the start (inclusive) of the time window in which one or more
+
+          workflows started to run. See the **created_to** request parameter.
+
+
+          This timestamp may be a partial timestamp, such as YYYY-MM-DD. The timestamp must be in ISO-8601 format and is in Coordinated Universal Time (UTC).
+
+
+          > **Important:** Only workflows that have a **created_at** value that falls within this time window is returned. See the **created_at** response property for the GET /workflow/runs/{id} endpoint.
+
+          '
+        schema:
+          type: string
+          format: date-time
+          default: '2026-04-01T00:00:00Z'
+          example: '2026-04-01T00:00:00Z'
+      - name: created_to
+        in: query
+        required: false
+        description: 'A timestamp that defines the end (exclusive) of the time window in which one or more
+
+          workflows started to run. See the **created_from** request parameter.
+
+
+          This timestamp may be a partial timestamp, such as YYYY-MM-DD. The timestamp must be in ISO-8601 format and is in Coordinated Universal Time (UTC).
+
+
+          > **Important:** Only workflows that have a **created_at** value that falls within this time window is returned. See the **created_at** response property for the GET /workflow/runs/{id} endpoint.
+
+          '
+        schema:
+          type: string
+          format: date-time
+          default: '2026-04-30T00:00:00Z'
+          example: '2026-04-30T00:00:00Z'
+      - name: ended_from
+        in: query
+        required: false
+        description: 'A timestamp that defines the start (inclusive) of the time window in which one or more
+
+          workflows stopped running. See the **ended_to** request parameter.
+
+
+          This timestamp may be a partial timestamp, such as YYYY-MM-DD. The timestamp must be in ISO-8601 format and is in Coordinated Universal Time (UTC).
+
+
+          > **Important:** Only workflows that have an **ended_at** value that falls within this time window is returned. See the **ended_at** response property for the GET /workflow/runs/{id} endpoint.
+
+          '
+        schema:
+          type: string
+          format: date-time
+          default: '2026-04-01T00:00:00Z'
+          example: '2026-04-01T00:00:00Z'
+      - name: ended_to
+        in: query
+        required: false
+        description: 'A timestamp that defines the end (exclusive) of the time window in which one or more
+
+          workflows stopped running. See the **ended_from** request parameter.
+
+
+          This timestamp may be a partial timestamp, such as YYYY-MM-DD. The timestamp must be in ISO-8601 format and is in Coordinated Universal Time (UTC).
+
+
+          > **Important:** Only workflows that have an **ended_at** value that falls within this time window is returned. See the **ended_at** response property for the GET /workflow/runs/{id} endpoint.
+
+          '
+        schema:
+          type: string
+          format: date-time
+          default: '2026-04-30T00:00:00Z'
+          example: '2026-04-30T00:00:00Z'
+      - name: state
+        in: query
+        required: false
+        description: 'Return a list of workflows that only match the specified workflow state. May be one of the following:
+
+
+          - Started
+
+          - In progress
+
+          - Stopping
+
+          - Stopped
+
+          - Succeeded
+
+
+          > **Note:** This is the same value that is visible from the Status column on each individual workflow page.
+
+          '
+        schema:
+          type: string
+          default: succeeded
+          example: succeeded
+      - name: type
+        in: query
+        required: false
+        description: 'Return a list of workflows that only match the specified workflow type.
+
+
+          > **Tip:** Use this endpoint to return a list of workflows and workflow types, and then use a value from the `type` response parameter to make a new request that filters by that workflow type value.
+
+          '
+        schema:
+          type: string
+          default: courier.group/run
+          example: courier.group/run
+      responses:
+        '200':
+          description: The **200** response returns a list of workflows.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags:
+      - Workflow
+      summary: POST /workflow/runs
+      operationId: run-workflow
+      description: 'Use the **POST /workflow/runs** endpoint to start a workflow. Supports running courier
+
+        groups, orchestration groups, and campaigns.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/ApiVersionHeader'
+      - $ref: '#/components/parameters/AmperityTenant'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowRunRequest'
+      responses:
+        '201':
+          description: The **201** response returns details for the workflow that was created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    servers:
+    - url: https://app.amperity.com/api
+      description: Amazon AWS
+    - url: https://<tenant-id>.amperity.com/api
+      description: Microsoft Azure
+      variables:
+        tenant-id:
+          default: your-tenant-id
+          description: Your Amperity tenant ID.
+  /workflow/runs/{workflow-id}:
+    get:
+      tags:
+      - Workflow
+      summary: GET /workflow/runs/{workflow-id}
+      operationId: get-workflow
+      description: 'Use the **GET /workflow/runs/{id}** endpoint to return details for a specific workflow.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/ApiVersionHeader'
+      - $ref: '#/components/parameters/AmperityTenant'
+      - name: workflow-id
+        in: path
+        required: true
+        description: 'The unique identifier for a workflow, similar to: `wf-20240603-12345-MNabc`. The workflow ID must be in the URL. For example: /workflow/runs/wf-20240603-12345-MNabc. Use the GET /workflow/runs endpoint to get a list of workflow IDs or copy the ID from the Workflows page in Amperity.
+
+          '
+        schema:
+          type: string
+          default: wf-20240603-12345-MNabc
+          example: wf-20240603-12345-MNabc
+      - name: view
+        in: query
+        required: false
+        description: 'Set this value to overview to return only the following parameters: created_at, ended_at, id, name, state, tenant, and type. Set this value to verbose to return all response parameters for the workflow, including for any tasks that were started by the workflow. Default value: overview.
+
+          '
+        schema:
+          type: string
+          enum:
+          - overview
+          - verbose
+          default: overview
+      responses:
+        '200':
+          description: The **200** response returns details for the named workflow.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    servers:
+    - url: https://app.amperity.com/api
+      description: Amazon AWS
+    - url: https://<tenant-id>.amperity.com/api
+      description: Microsoft Azure
+      variables:
+        tenant-id:
+          default: your-tenant-id
+          description: Your Amperity tenant ID.
+  /workflow/runs/{workflow-id}/stop:
+    post:
+      tags:
+      - Workflow
+      summary: POST /workflow/runs/{workflow-id}/stop
+      operationId: stop-workflow
+      description: 'Use the **POST /workflow/runs/{id}/stop** endpoint to stop a running workflow.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/ApiVersionHeader'
+      - $ref: '#/components/parameters/AmperityTenant'
+      - name: workflow-id
+        in: path
+        required: true
+        description: 'The Amperity internal identifier for the workflow. For example: `wf-20240619-14418-6UhqSe`. On the workflows page, under Actions, copy the workflow id from the dropdown.
+
+          '
+        schema:
+          type: string
+          default: wf-20240603-12345-MNabc
+          example: wf-20240603-12345-MNabc
+      responses:
+        '200':
+          description: The **200** response returns details for the workflow that was stopped.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    servers:
+    - url: https://app.amperity.com/api
+      description: Amazon AWS
+    - url: https://<tenant-id>.amperity.com/api
+      description: Microsoft Azure
+      variables:
+        tenant-id:
+          default: your-tenant-id
+          description: Your Amperity tenant ID.
+components:
+  schemas:
+    Workflow:
+      type: object
+      description: A workflow.
+      required:
+      - id
+      - state
+      - type
+      - name
+      - tenant
+      - created_at
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the workflow.
+          example: wf-20240619-14418-6UhqSe
+        state:
+          type: string
+          description: The current state of the workflow.
+          example: succeeded
+        type:
+          type: string
+          description: The type of workflow.
+          example: campaign.send
+        name:
+          type: string
+          description: The name of the workflow.
+          example: Customer Attribute Daily
+        tenant:
+          type: string
+          description: The unique identifier for the tenant.
+          example: <tenant-id>
+        created_at:
+          type: string
+          format: date-time
+          description: The date and time at which a workflow started.
+          example: '2026-06-19T04:00:18.764Z'
+        ended_at:
+          type: string
+          format: date-time
+          description: 'The date and time at which a workflow ended.
+
+
+            > **Note:** The amount of time that elapsed between `created_at` and `ended_at` is the runtime for the workflow.
+
+            '
+          example: '2026-06-19T04:03:10.119Z'
+        principal_id:
+          type: string
+          description: 'A unique identifier for the Amperity user who started the workflow. For example: `google-apps|socktown@socktown.com`.
+
+            '
+          example: google-apps|<tenant-id>@<tenant-id>.com
+        principal_name:
+          type: string
+          description: 'The name of the Amperity user who started the workflow. For example: `Justin Scott` or `Automated workflow`.
+
+            '
+          example: Justin Scott
+        principal_email:
+          type: string
+          description: The email address for the user who started the workflow.
+          example: justin.scott@<tenant-id>.com
+        launched_version:
+          type: string
+          description: 'A unique identifier that describes the configuration state of Amperity at the start of the workflow. The value for this property is similar to: `etv-20240210-12345-6AbCDE`.
+
+            '
+          example: etv-20240210-12345-6AbCDE
+        current_version:
+          type: string
+          description: 'A unique identifier that describes the configuration state of Amperity at the end of the workflow or at the time an error occurred. The value for this property is similar to: `etv-20240210-12345-6AbCDE`.
+
+            '
+          example: etv-20240210-12345-6AbCDE
+        warn_after_ms:
+          type: integer
+          description: 'The length of time in milliseconds after which a warning is sent that notifies users that a workflow is running longer than expected. This parameter only applies to workflows that use SQL to write tables to storage.
+
+            '
+          example: 86400000
+        task_instances:
+          type: array
+          description: The list of tasks in the workflow. Populated only when view is set to verbose.
+          items:
+            $ref: '#/components/schemas/WorkflowTaskInstance'
+        error:
+          allOf:
+          - $ref: '#/components/schemas/WorkflowError'
+          description: 'An error associated with this workflow. Populated only for workflows in an error state.
+
+            '
+    WorkflowTaskInstance:
+      type: object
+      description: A task within a workflow.
+      required:
+      - id
+      - state
+      - tenant
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the task instance.
+          example: wft-20240619-14574-6kyYdY
+        state:
+          type: string
+          description: 'The current state of the task. For example:
+
+
+            - Scheduled
+
+            - Started
+
+            - In progress
+
+            - Running
+
+            - Finalizing
+
+            - Succeeded
+
+            - Stopping
+
+            - Stopped
+
+            - Failed
+
+            - Skipped
+
+            - Canceled
+
+            '
+          example: failed
+        tenant:
+          type: string
+          description: The unique identifier for the tenant.
+          example: <tenant-id>
+        created_at:
+          type: string
+          format: date-time
+          description: The date and time at which a workflow task started.
+          example: '2026-06-19T04:02:54.433Z'
+        ended_at:
+          type: string
+          format: date-time
+          description: The date and time at which a workflow task ended.
+          example: '2026-06-19T04:03:10.094Z'
+        execution_type:
+          type: string
+          description: 'The service that runs a workflow task. Possible return values are spark-sql, prodigal, prodigal-aurora, databricks, identity, task-identity, legacy.
+
+            '
+          example: spark-sql
+        label:
+          type: string
+          description: The name of the task instance.
+          example: Sending treatment customer_attribute_group to destination - S3
+        run_id:
+          type: string
+          description: 'A unique identifier provided to the task instance to support situations where execution engines cannot provide a run ID. The value for this property is similar to: `abc-20240210-12345-6AbCDE`.
+
+            '
+          example: orb-20240619-EDnCxzmhrLN
+        state_changed_at:
+          type: string
+          format: date-time
+          description: 'The date and time at which the task completed and the state of the workflow was updated. This can be the same value as ended_at.
+
+            '
+          example: '2026-06-19T04:03:10.094Z'
+        task_definition_id:
+          type: string
+          description: 'A unique identifier for a task definition. These values often contain human-readable strings within a series of alphanumeric characters.
+
+            '
+          example: send/ct-2yrcnb2Hn/ptg-2XsDnXwEu/pd-2ycaK3gfh
+        task_definition_type:
+          type: string
+          description: 'The task definition type. The possible values for this property are similar to the type property for the workflow. For example, `bridge.sync` or `campaign.append-results`.
+
+            '
+          example: campaign.send
+        timeout_ms:
+          type: integer
+          description: The length of time in milliseconds after which a running task instance will be forced to stop.
+          example: 172800000
+        workflow_id:
+          type: string
+          description: The unique identifier for the workflow to which this task belongs.
+          example: wf-20240619-14418-6UhqSe
+        error:
+          allOf:
+          - $ref: '#/components/schemas/WorkflowError'
+          description: 'An error associated with this task. Populated only for tasks in an error state.
+
+            '
+    ErrorResponse:
+      type: object
+      description: An error response returned by the API.
+      required:
+      - status
+      - message
+      additionalProperties: false
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code.
+          example: 400
+        message:
+          type: string
+          description: A description of the error.
+          example: An unexpected error occurred.
+    WorkflowRunRequest:
+      type: object
+      description: The request body used to start a new workflow.
+      required:
+      - config_id
+      additionalProperties: false
+      properties:
+        config_id:
+          type: string
+          description: 'The configuration ID of the workflow. This may be the ID for a courier group,
+
+            orchestration group, or campaign.
+
+
+            You can find the ID for the workflow to be run in the following locations:
+
+
+            - From the Sources page, open the menu in the same row as the courier group, and then select Copy ID.
+
+            - From the Destinations page, open the menu in the same row as the orchestration group, and then select Copy ID.
+
+            - From the Campaigns page, open the menu in the same row as the campaign, and then select Copy ID.
+
+            '
+          default: cg-123ABc4DE
+          example: cg-123ABc4DE
+        range_from:
+          type: string
+          format: date-time
+          description: 'String. Required for file-based workflows. Courier groups only.
+
+
+            > **Important:** A value for `range_from` must be specified for any courier group that is configured to pull files from cloud storage: SFTP, Amazon S3, Azure Blob Storage, or Google Cloud Storage.
+
+
+            A timestamp that defines the start (inclusive) of the time window for which couriers in the workflow should pull data. See the `range_to` request parameter.
+
+
+            A timestamp must be in ISO-8601 format and in Coordinated Universal Time (UTC).
+
+
+            > **Tip:** Use with `range_to` to define a date range within which to look for files. This date range is inclusive of `range_from` and exclusive of `range_to`. Use without `range_to` to define a specific day on which to run the workflow.
+
+            '
+          default: '2026-10-01T00:00:00Z'
+          example: '2026-10-01T00:00:00Z'
+        range_to:
+          type: string
+          format: date-time
+          description: 'String. Optional. Courier groups only.
+
+
+            > **Important:** A value for `range_from` must be specified when `range_to` is included in the request.
+
+
+            A timestamp that defines the end (exclusive) of the time window for which couriers in the workflow should pull data. See the `range_from` request parameter.
+
+
+            A timestamp must be in ISO-8601 format and in Coordinated Universal Time (UTC).
+
+            '
+          default: '2026-10-07T00:00:00Z'
+          example: '2026-10-07T00:00:00Z'
+        run_mode:
+          type: string
+          description: 'String. Optional. Courier groups only.
+
+
+            Indicates the run mode for the courier group workflow. Possible values: `full`, `refresh`, or `source`.
+
+
+            - Use `full` to pull data, refresh domain tables, run Stitch, update databases, then send workflow results downstream. All activations, including orchestrations, campaigns, and journeys, that are associated with this workflow is run.
+
+            - Use `refresh` to pull data, refresh domain tables, run Stitch, and then update databases.
+
+            - Use `source` to pull data and refresh domain tables.
+
+
+            > **Tip:** `run_mode` will default to the run mode that is configured for the scheduled workflow. You may override the configured setting by providing a value for `run_mode` in the request.
+
+            '
+          enum:
+          - source
+          - refresh
+          - full
+          default: full
+          example: full
+    WorkflowError:
+      type: object
+      description: An error associated with a workflow or workflow task.
+      required:
+      - type
+      - message
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          description: A period-delimited string that indicates where an error occurred.
+          example: amperity.workflow.task.stitch/table
+        message:
+          type: string
+          description: The error message.
+          example: Found table in an invalid state.
+        attribution:
+          type: string
+          description: 'The source of the error. May be attributed to `customer` or `platform`.
+
+
+            - `customer` indicates the source of the error is one or more configuration issues within Amperity. These issues can often be resolved by updating the configuration, and then restarting or rerunning the workflow.
+
+            - `platform` indicates there is an issue with components or services that Amperity relies on to process the workflow. These issues are often transient and rerunning the workflow will resolve the error. In some cases, this type of error may require help from Amperity Support.
+
+            '
+          example: customer
+        data:
+          description: 'Additional data associated with the error. May be absent or null when no additional data is available.
+
+            '
+    WorkflowList:
+      type: object
+      description: A paginated list of workflows.
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: Workflow items on this page.
+          items:
+            $ref: '#/components/schemas/Workflow'
+        next_token:
+          type: string
+          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
+
+            '
+          example: ZVEy1iwsKBs9a6H
+        total:
+          type: integer
+          description: The total count of all results. Only returned when with_total is set to true.
+  responses:
+    BadRequest:
+      description: Bad Request — the request was malformed or contained invalid parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not Found — the requested resource does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Internal Server Error — an unexpected error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Not Authorized — the API key does not have permission for this operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication Required — no valid Bearer token was provided.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  parameters:
+    AmperityTenant:
+      name: amperity-tenant
+      in: header
+      required: true
+      description: The unique identifier for the tenant.
+      schema:
+        type: string
+        example: <tenant-id>
+    ApiVersionHeader:
+      name: api-version
+      in: header
+      required: true
+      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
+      schema:
+        type: string
+        enum:
+        - '2024-04-01'
+        default: '2024-04-01'
+        example: '2024-04-01'
+    NextToken:
+      name: next_token
+      in: query
+      required: false
+      description: 'An opaque token that is used to paginate results. Omit the `next_token` property
+
+        to return the first page. Use the cursor value for `next_token` that was returned
+
+        in a response to view the next page of results.
+
+
+        For example: `ABCd1fghIJk2l3M`
+
+
+        > **Note:** The possible values for `next_token` are returned within the 200 response.
+
+
+        > **Important:** The value for `next_token` cannot be null.
+
+        '
+      schema:
+        type: string
+        example: ZVEy1iwsKBs9a6H
+    WithTotal:
+      name: with_total
+      in: query
+      required: false
+      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
+
+
+        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
+
+        '
+      schema:
+        type: boolean
+        default: false
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of records to include in a single page of results.
+      schema:
+        type: integer
+    ApiVersionHeader_2:
+      name: api-version
+      in: header
+      required: true
+      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
+      schema:
+        type: string
+        enum:
+        - '2024-04-01'
+        - unstable
+        default: unstable
+        example: '2024-04-01'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Authenticate using a Bearer token generated from an Amperity API key. Include the token in the Authorization header of every request.
+
+        '
+x-refined-from:
+- amperity-control-plane-2024-04-01-openapi.json
+- amperity-control-plane-unstable-openapi.json

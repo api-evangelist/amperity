@@ -1,0 +1,398 @@
+openapi: 3.2.0
+info:
+  title: Amperity Ingest API
+  contact:
+    url: https://docs.amperity.com/api/
+  version: '1.0'
+  description: 'Operations tagged Ingest across 2 of this provider''s published API definitions: amperity-control-plane-2024-04-01-openapi.json, amperity-control-plane-unstable-openapi.json. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://app.amperity.com/api
+  description: Amazon AWS
+- url: https://<tenant-id>.amperity.com/api
+  description: Microsoft Azure
+  variables:
+    tenant-id:
+      default: your-tenant-id
+      description: Your Amperity tenant ID.
+security:
+- BearerAuth: []
+tags:
+- name: Ingest
+  description: Return details about ingest jobs.
+paths:
+  /ingest/jobs:
+    get:
+      tags:
+      - Ingest
+      summary: GET /ingest/jobs
+      operationId: list-ingest-jobs
+      description: 'Use the **GET /ingest/jobs** endpoint to return a list of jobs from your tenant that
+
+        occurred within the previous 7 days.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/ApiVersionHeader'
+      - $ref: '#/components/parameters/AmperityTenant'
+      - $ref: '#/components/parameters/WithTotal'
+      - name: created_from
+        in: query
+        required: true
+        description: 'A timestamp that defines the start (inclusive) of a 7-day time window in which one or
+
+          more ingest jobs started. See the **created_to** request parameter.
+
+
+          This timestamp may be a partial timestamp, such as YYYY-MM-DD. The timestamp must be in ISO-8601 format and is in Coordinated Universal Time (UTC).
+
+
+          > **Important:** Only ingest jobs that have a **started_at** value that falls within this time window is returned. See the **created_at** response property for the GET /ingest/jobs/{id} endpoint.
+
+          '
+        schema:
+          type: string
+          format: date-time
+          default: '2026-10-01T00:00:00Z'
+          example: '2026-10-01T00:00:00Z'
+      - name: created_to
+        in: query
+        required: true
+        description: 'A timestamp that defines the end (exclusive) of a 7-day time window in which one or
+
+          more ingest jobs started. See the **created_from** request parameter.
+
+
+          This timestamp may be a partial timestamp, such as YYYY-MM-DD. The timestamp must be in ISO-8601 format and is in Coordinated Universal Time (UTC).
+
+
+          > **Important:** Only ingest jobs that have a **started_at** value that falls within this time window is returned. See the **created_at** response property for the GET /ingest/jobs/{id} endpoint.
+
+          '
+        schema:
+          type: string
+          format: date-time
+          default: '2026-10-07T00:00:00Z'
+          example: '2026-10-07T00:00:00Z'
+      responses:
+        '200':
+          description: 'The **200** response returns a set of records, files, and feeds that were ingested during the specified range.
+
+            '
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestJobDetailsList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    servers:
+    - url: https://app.amperity.com/api
+      description: Amazon AWS
+    - url: https://<tenant-id>.amperity.com/api
+      description: Microsoft Azure
+      variables:
+        tenant-id:
+          default: your-tenant-id
+          description: Your Amperity tenant ID.
+  /ingest/jobs/{job-id}:
+    get:
+      tags:
+      - Ingest
+      summary: GET /ingest/jobs/{job-id}
+      operationId: get-ingest-job
+      description: 'Use the **GET /ingest/jobs/{id}** endpoint to return details for a specific ingest job,
+
+        including a summary of the records, files, and feeds that were ingested.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/ApiVersionHeader'
+      - $ref: '#/components/parameters/AmperityTenant'
+      - name: job-id
+        in: path
+        required: true
+        description: 'The Amperity internal identifier for the ingest job. For example: `isj-20240701-48815-6dcXdk`. From the workflows page, on the right side, click Recent Activity, select Ingest details under the job, and copy the job id from the open dialog box.
+
+          '
+        schema:
+          type: string
+          default: isj-20240827-54061-2l6XhD
+          example: isj-20240827-54061-2l6XhD
+      responses:
+        '200':
+          description: The **200** response returns details for the specified ingest job.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestJobDetails'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    servers:
+    - url: https://app.amperity.com/api
+      description: Amazon AWS
+    - url: https://<tenant-id>.amperity.com/api
+      description: Microsoft Azure
+      variables:
+        tenant-id:
+          default: your-tenant-id
+          description: Your Amperity tenant ID.
+components:
+  schemas:
+    IngestFileDetails:
+      type: object
+      description: Details about a single file processed during an ingest job.
+      required:
+      - file_id
+      - read
+      - errors
+      additionalProperties: false
+      properties:
+        file_id:
+          type: string
+          description: The identifier for the file.
+          example: cb-20240618-71992-SF3Uz/part0.avro
+        name:
+          type: string
+          description: The human-readable identifier for the file.
+          example: part0.avro
+        read:
+          type: integer
+          description: The total count of records processed in this file.
+          example: 1000
+        errors:
+          type: integer
+          description: 'The number of rows with an ingest error. For example, when Amperity cannot match a field value to the expected data type.
+
+            '
+          example: 200
+    IngestFeedDetails:
+      type: object
+      description: Details about a single feed processed during an ingest job.
+      required:
+      - feed_id
+      - job_id
+      - table_name
+      - state
+      - read
+      - errors
+      - rejected
+      - inserted
+      - updated
+      - started_at
+      - ended_at
+      - files
+      additionalProperties: false
+      properties:
+        feed_id:
+          type: string
+          description: The unique ID of this feed.
+          example: df-5L6d1veh
+        job_id:
+          type: string
+          description: The ingest job identifier.
+          example: isj-1f73r9u2
+        table_name:
+          type: string
+          description: The name of the table.
+          example: My table
+        state:
+          type: string
+          description: 'The current state of the job. For example: Scheduled, Started, In progress, Running, Finalizing, Succeeded, Stopping, Stopped, Failed, Skipped, or Canceled.
+
+            '
+          example: succeeded
+        read:
+          type: integer
+          description: The number of rows ingested into this feed.
+          example: 1000
+        errors:
+          type: integer
+          description: The number of rows with an ingest error.
+          example: 200
+        rejected:
+          type: integer
+          description: The number of duplicate rows that were not ingested.
+          example: 200
+        inserted:
+          type: integer
+          description: The number of records that were inserted into the table.
+          example: 400
+        updated:
+          type: integer
+          description: The total count of rows updated for this feed during the job.
+          example: 200
+        started_at:
+          type: string
+          format: date-time
+          description: The date and time at which the job started, in ISO-8601 format and in UTC.
+          example: '2026-06-01T04:02:54.433Z'
+        ended_at:
+          type: string
+          format: date-time
+          description: The date and time at which the job ended, in ISO-8601 format and in UTC.
+          example: '2026-06-01T04:02:57.433Z'
+        files:
+          type: array
+          description: A collection of file details for each file processed in this feed.
+          items:
+            $ref: '#/components/schemas/IngestFileDetails'
+    ErrorResponse:
+      type: object
+      description: An error response returned by the API.
+      required:
+      - status
+      - message
+      additionalProperties: false
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code.
+          example: 400
+        message:
+          type: string
+          description: A description of the error.
+          example: An unexpected error occurred.
+    IngestJobDetailsList:
+      type: object
+      description: A list of ingest jobs for the specified time window.
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: Ingest job items for the specified time window.
+          items:
+            $ref: '#/components/schemas/IngestJobDetails'
+        next_token:
+          type: string
+          description: 'The next_token parameter is included in the response but is not available for use with the GET /ingest/jobs endpoint.
+
+            '
+          example: ZVEy1iwsKBs9a6H
+        total:
+          type: integer
+          description: The total count of all results. Only returned when with_total is set to true.
+    IngestJobDetails:
+      type: object
+      description: 'Details for a single ingest job, including a summary of all feeds and files processed.
+
+        '
+      required:
+      - id
+      - workflow_id
+      - tables
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: The ingest job identifier.
+          example: isj-1f73r9u2
+        workflow_id:
+          type: string
+          description: The Amperity internal identifier for the workflow that ran this job.
+          example: wf-20240618-3423-b45
+        tables:
+          type: array
+          description: A summary of table details from this ingest job.
+          items:
+            $ref: '#/components/schemas/IngestFeedDetails'
+  responses:
+    BadRequest:
+      description: Bad Request — the request was malformed or contained invalid parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not Found — the requested resource does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Internal Server Error — an unexpected error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Not Authorized — the API key does not have permission for this operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication Required — no valid Bearer token was provided.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  parameters:
+    AmperityTenant:
+      name: amperity-tenant
+      in: header
+      required: true
+      description: The unique identifier for the tenant.
+      schema:
+        type: string
+        example: <tenant-id>
+    ApiVersionHeader:
+      name: api-version
+      in: header
+      required: true
+      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
+      schema:
+        type: string
+        enum:
+        - '2024-04-01'
+        default: '2024-04-01'
+        example: '2024-04-01'
+    WithTotal:
+      name: with_total
+      in: query
+      required: false
+      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
+
+
+        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
+
+        '
+      schema:
+        type: boolean
+        default: false
+    ApiVersionHeader_2:
+      name: api-version
+      in: header
+      required: true
+      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
+      schema:
+        type: string
+        enum:
+        - '2024-04-01'
+        - unstable
+        default: unstable
+        example: '2024-04-01'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Authenticate using a Bearer token generated from an Amperity API key. Include the token in the Authorization header of every request.
+
+        '
+x-refined-from:
+- amperity-control-plane-2024-04-01-openapi.json
+- amperity-control-plane-unstable-openapi.json

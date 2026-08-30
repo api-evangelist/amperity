@@ -1,0 +1,357 @@
+openapi: 3.2.0
+info:
+  title: Amperity Campaigns API
+  contact:
+    url: https://docs.amperity.com/api/
+  version: '1.0'
+  description: 'Operations tagged Campaigns across 2 of this provider''s published API definitions: amperity-control-plane-2024-04-01-openapi.json, amperity-control-plane-unstable-openapi.json. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://app.amperity.com/api
+  description: Amazon AWS
+- url: https://<tenant-id>.amperity.com/api
+  description: Microsoft Azure
+  variables:
+    tenant-id:
+      default: your-tenant-id
+      description: Your Amperity tenant ID.
+security:
+- BearerAuth: []
+tags:
+- name: Campaigns
+  description: Return information about campaigns and campaign drafts.
+paths:
+  /campaigns:
+    get:
+      tags:
+      - Campaigns
+      summary: GET /campaigns
+      operationId: list-campaign
+      description: 'Use the **GET /campaigns** endpoint to return a list of campaigns from your tenant. You may
+
+        restrict the list of campaigns to those associated with a specific data template.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/ApiVersionHeader'
+      - $ref: '#/components/parameters/AmperityTenant'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/NextToken'
+      - $ref: '#/components/parameters/WithTotal'
+      - name: destination_data_template_id
+        in: query
+        required: false
+        description: 'Use this parameter to restrict the list of campaigns that are returned to only
+
+          campaigns that are configured to use a specific data template.
+
+
+          > **Tip:** You can find the ID for the data template from the Amperity user interface. From the Destinations page, open the menu in the same row as the data template for which the ID is to be copied, and then select Copy ID.
+
+          '
+        schema:
+          type: string
+          default: ptg-2QLLqXBEq
+          example: ptg-2QLLqXBEq
+      responses:
+        '200':
+          description: The **200** response returns a set of campaigns.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    servers:
+    - url: https://app.amperity.com/api
+      description: Amazon AWS
+    - url: https://<tenant-id>.amperity.com/api
+      description: Microsoft Azure
+      variables:
+        tenant-id:
+          default: your-tenant-id
+          description: Your Amperity tenant ID.
+  /campaign-drafts:
+    get:
+      tags:
+      - Campaigns
+      summary: GET /campaign-drafts
+      operationId: list-campaign-draft
+      description: 'Use the **GET /campaign-drafts** endpoint to return a list of draft campaigns from your
+
+        tenant. You may restrict the list of draft campaigns to those associated with a specific
+
+        data template.
+
+
+        > **Note:** This endpoint is only available from the **unstable** version of the Amperity
+
+        > API and may change without notice.
+
+        '
+      parameters:
+      - $ref: '#/components/parameters/ApiVersionHeader_2'
+      - $ref: '#/components/parameters/AmperityTenant'
+      - $ref: '#/components/parameters/Limit'
+      - $ref: '#/components/parameters/NextToken'
+      - $ref: '#/components/parameters/WithTotal'
+      - name: destination_data_template_id
+        in: query
+        required: false
+        description: 'Use this parameter to restrict the list of campaign drafts that are returned to only
+
+          campaign drafts that are configured to use a specific data template.
+
+
+          > **Tip:** You can find the ID for the data template from the Amperity user interface. From the Destinations page, open the menu in the same row as the data template for which the ID is to be copied, and then select Copy ID.
+
+          '
+        schema:
+          type: string
+          default: ptg-2QLLqXBEq
+          example: ptg-2QLLqXBEq
+      responses:
+        '200':
+          description: The **200** response returns a set of draft campaigns.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignDraftList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    servers:
+    - url: https://app.amperity.com/api
+      description: Amazon AWS
+    - url: https://<tenant-id>.amperity.com/api
+      description: Microsoft Azure
+      variables:
+        tenant-id:
+          default: your-tenant-id
+          description: Your Amperity tenant ID.
+components:
+  responses:
+    BadRequest:
+      description: Bad Request — the request was malformed or contained invalid parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Internal Server Error — an unexpected error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Not Authorized — the API key does not have permission for this operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication Required — no valid Bearer token was provided.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    CampaignList:
+      type: object
+      description: A paginated list of campaigns.
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: Campaign items on this page.
+          items:
+            $ref: '#/components/schemas/Campaign'
+        next_token:
+          type: string
+          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
+
+            '
+          example: ZVEy1iwsKBs9a6H
+        total:
+          type: integer
+          description: The total count of all results. Only returned when with_total is set to true.
+    ErrorResponse:
+      type: object
+      description: An error response returned by the API.
+      required:
+      - status
+      - message
+      additionalProperties: false
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code.
+          example: 400
+        message:
+          type: string
+          description: A description of the error.
+          example: An unexpected error occurred.
+    Campaign:
+      type: object
+      description: A campaign.
+      required:
+      - id
+      - name
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: The Amperity internal identifier for the campaign.
+          example: cc-21HCWon6Y
+        name:
+          type: string
+          description: The name of the campaign.
+          example: Holiday Campaign
+        deliver_at:
+          type: string
+          format: date-time
+          description: 'The date and time at which the campaign was delivered or will be delivered, in ISO-8601 format and in UTC.
+
+            '
+          example: '2026-04-22T20:30:00Z'
+    CampaignDraftList:
+      type: object
+      description: A paginated list of campaign drafts.
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: Campaign draft items on this page.
+          items:
+            $ref: '#/components/schemas/CampaignDraft'
+        next_token:
+          type: string
+          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
+
+            '
+          example: ZVEy1iwsKBs9a6H
+        total:
+          type: integer
+          description: The total count of all results. Only returned when with_total is set to true.
+    CampaignDraft:
+      type: object
+      description: A campaign draft.
+      required:
+      - id
+      - name
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: The Amperity internal identifier for the campaign draft.
+          example: cc-21HCWon6Y
+        name:
+          type: string
+          description: The name of the campaign draft.
+          example: Holiday Campaign Draft
+        deliver_at:
+          type: string
+          format: date-time
+          description: 'The date and time at which the campaign was delivered or will be delivered, in ISO-8601 format and in UTC.
+
+            '
+          example: '2026-04-22T20:30:00Z'
+  parameters:
+    AmperityTenant:
+      name: amperity-tenant
+      in: header
+      required: true
+      description: The unique identifier for the tenant.
+      schema:
+        type: string
+        example: <tenant-id>
+    ApiVersionHeader:
+      name: api-version
+      in: header
+      required: true
+      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
+      schema:
+        type: string
+        enum:
+        - '2024-04-01'
+        default: '2024-04-01'
+        example: '2024-04-01'
+    NextToken:
+      name: next_token
+      in: query
+      required: false
+      description: 'An opaque token that is used to paginate results. Omit the `next_token` property
+
+        to return the first page. Use the cursor value for `next_token` that was returned
+
+        in a response to view the next page of results.
+
+
+        For example: `ABCd1fghIJk2l3M`
+
+
+        > **Note:** The possible values for `next_token` are returned within the 200 response.
+
+
+        > **Important:** The value for `next_token` cannot be null.
+
+        '
+      schema:
+        type: string
+        example: ZVEy1iwsKBs9a6H
+    WithTotal:
+      name: with_total
+      in: query
+      required: false
+      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
+
+
+        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
+
+        '
+      schema:
+        type: boolean
+        default: false
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of records to include in a single page of results.
+      schema:
+        type: integer
+    ApiVersionHeader_2:
+      name: api-version
+      in: header
+      required: true
+      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
+      schema:
+        type: string
+        enum:
+        - '2024-04-01'
+        - unstable
+        default: unstable
+        example: '2024-04-01'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: 'Authenticate using a Bearer token generated from an Amperity API key. Include the token in the Authorization header of every request.
+
+        '
+x-refined-from:
+- amperity-control-plane-2024-04-01-openapi.json
+- amperity-control-plane-unstable-openapi.json
