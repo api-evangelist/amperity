@@ -52,6 +52,10 @@ image: https://docs.amperity.com/_static/icon-light.svg
 specificationVersion: '0.23'
 created: '2026-07-17'
 modified: '2026-09-16'
+x-docs-platform: sphinx
+x-docs-platform-confidence: medium
+x-docs-platform-checked: 2026-09-18
+x-docs-hosting: aws-cloudfront
 tags:
 - Company
 - Enterprise
