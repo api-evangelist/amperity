@@ -1,10 +1,17 @@
 openapi: 3.2.0
 info:
-  title: Amperity Audit Events API
+  title: Amperity API (Unstable) Audit Events API
+  version: unstable
+  description: '## Overview
+
+
+    The Amperity API enables programmatic access to your Amperity tenant through a collection
+
+    of RESTful endpoints that support API-first use cases for integrations, applications, and
+
+    custom workflows.'
   contact:
     url: https://docs.amperity.com/api/
-  version: '1.0'
-  description: 'Operations tagged Audit Events across 2 of this provider''s published API definitions: amperity-control-plane-2024-04-01-openapi.json, amperity-control-plane-unstable-openapi.json. Each path carries the servers of the definition it was published in.'
 servers:
 - url: https://app.amperity.com/api
   description: Amazon AWS
@@ -26,276 +33,7 @@ paths:
       - Audit Events
       summary: GET /audit-events
       operationId: list-events
-      description: 'Amperity maintains records of user activity that occured in your tenant. For example:
-
-
-        - A user makes a configuration change to the Amperity platform
-
-        - A user creates a sandbox
-
-        - A user views personally identifiable information (PII)
-
-        - A workflow was stopped by a user
-
-        - A user configured a destination
-
-        - A user created an API key
-
-        - A user was assigned to a resource group
-
-
-        Use the **GET /audit-events** endpoint to return a log of user activity that occurred with
-
-        your tenant. Each response may contain up to 1000 audit events.
-
-
-        > **Note:** When requesting events for a production tenant, audit events for sandboxes are
-
-        > included in the response. When requesting events from a sandbox, only events from that
-
-        > sandbox are included in the response.
-
-
-        ## Common event types
-
-
-        The following table lists the most common event types, grouped by the component or area
-
-        within Amperity that is most associated with the event type.
-
-
-        > **Note:** Many events are prefixed with a dot-delimited string that typically starts with
-
-        > "amperity". The specific event is located after a slash ("/"). For example, the event
-
-        > **:amperity.plugin.destination/created** is shown in this table as
-
-        > **destination/created**. If your tenant shows an event that is not listed here, its
-
-        > purpose can often be inferred from the string and the event after the trailing slash.
-
-
-        **AI Assistant**
-
-
-        The following events are associated with the AI Assistant:
-
-
-        - `assistant/send-user-message` — A user sent a question to the AI Assistant. The audit event may include the response from the AI assistant.
-
-        - `query.exec/sampled` — A set of sample data was provided to the AI Assistant.
-
-
-        **API keys**
-
-
-        The following events are associated with API keys:
-
-
-        - `api-key/created` — An API key was created.
-
-        - `api-key/deleted` — An API key was deleted.
-
-        - `api-key/issue` — An API token issuer was created.
-
-        - `api-key/updated` — An API key was updated.
-
-
-        **BI Connect**
-
-
-        The following events are associated with BI Connect:
-
-
-        - `warehouse/user-added` — A user was added to BI Connect.
-
-        - `warehouse/user-removed` — A user was removed from BI Connect.
-
-        - `warehouse/user-renewed` — A user was allowed to continue accessing BI Connect.
-
-
-        **Credentials**
-
-
-        The following events are associated with credentials:
-
-
-        - `credential/created` — A credential was created.
-
-        - `credential/deleted` — A credential was deleted.
-
-        - `credential/updated` — A credential was updated.
-
-
-        **Destinations**
-
-
-        The following events are associated with destinations:
-
-
-        - `destination/cloned` — A user created a destination by copying an existing destination.
-
-        - `destination/created` — A user created a destination.
-
-        - `destination/deleted` — A user deleted a destination.
-
-        - `destination/updated` — A user updated a destination.
-
-
-        **Domain tables**
-
-
-        The following events are associated with domain tables:
-
-
-        - `workflow/domain-data-records-deletion-started` — A user deleted records from a domain table.
-
-
-        **Orchestrations**
-
-
-        The following events are associated with orchestrations and orchestration groups:
-
-
-        - `orchestration/run` — A user initiated a manual run for an orchestration.
-
-        - `orchestration.group/run` — A user initiated a manual run for an orchestration group.
-
-
-        **Policies**
-
-
-        The following events are associated with policies:
-
-
-        - `policy/attached` and `policy/attached-to` — A policy was attached to an object that was created within Amperity.
-
-        - `policy/created` — A policy was created.
-
-        - `policy/deleted` — A policy was deleted.
-
-        - `policy/detached` and `policy/detached-from` — A policy was detached from an object that exists within Amperity.
-
-        - `policy/updated` — A policy was updated.
-
-
-        **Privacy rights**
-
-
-        The following events are associated with privacy rights workflows:
-
-
-        - `workflow/domain-ccpa-deletion-started` — The CCPA delete workflow has started.
-
-
-        **Queries**
-
-
-        The following events are associated with the **Queries** page:
-
-
-        - `query/activated` — A query was activated.
-
-        - `query/created` — A query was created.
-
-        - `query/deleted` — A query was deleted.
-
-        - `query/moved` — A query was moved from one folder into another.
-
-        - `query.draft/discarded` — A query in a draft state was discarded.
-
-        - `query.folder/created` — A folder on the **Queries** page was created.
-
-        - `query.folder/deleted` — A folder on the **Queries** page was deleted.
-
-
-        **Resource groups**
-
-
-        The following events are associated with resource groups:
-
-
-        - `resource-group/assigned` — A user was assigned to a resource group.
-
-        - `resource-group/created` — A resource group was created.
-
-        - `resource-group/deleted` — A resource group was deleted.
-
-        - `resource-group/updated` — A resource group was updated.
-
-
-        **Sandboxes**
-
-
-        The following events are associated with sandboxes:
-
-
-        - `tenant/created` — A sandbox was created.
-
-        - `tenant/deleted` — A sandbox was deleted.
-
-        - `tenant/updated` — A sandbox was updated.
-
-
-        **Single Sign-on**
-
-
-        The following events are associated with single sign-on (SSO):
-
-
-        - `group-mapping/created` — An SSO group mapping was created.
-
-        - `group-mapping/deleted` — An SSO group mapping was deleted.
-
-        - `group-mapping/updated` — An SSO group mapping was updated.
-
-
-        **User activity**
-
-
-        The following events are associated with the **Users** section within the **Users and Activity** page:
-
-
-        - `audit.user-activity/download` — A user downloaded user activity into a CSV file to view offline.
-
-
-        **Users**
-
-
-        The following events are associated with Amperity user accounts managed from the **Users and Activity** page:
-
-
-        - `user/created` — A user was created.
-
-        - `user/deleted` — A user was deleted.
-
-        - `user/sent-password-reset-email` — A user was sent an email so they can reset their password.
-
-
-        **Workflow alerts**
-
-
-        The following events are associated with workflow alerts:
-
-
-        - `audience/created` — An audience for a workflow alert was created.
-
-        - `audience/updated` — The membership of an audience for a workflow alert was updated.
-
-
-        **Workflows**
-
-
-        The following events are associated with workflows:
-
-
-        - `workflow/cancel` — A workflow resolution was stopped by a user.
-
-        - `workflow/retry` — A workflow resolution was opened, a specific resolution option was selected, and then the workflow was retried.
-
-        - `workflow/skip` — A user opened a workflow resolution, and then skipped the task that caused the workflow failure.
-
-        '
+      description: Amperity maintains records of user activity that occured in your tenant.
       parameters:
       - $ref: '#/components/parameters/ApiVersionHeader'
       - $ref: '#/components/parameters/AmperityTenant'
@@ -351,41 +89,71 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/InternalError'
-    servers:
-    - url: https://app.amperity.com/api
-      description: Amazon AWS
-    - url: https://<tenant-id>.amperity.com/api
-      description: Microsoft Azure
-      variables:
-        tenant-id:
-          default: your-tenant-id
-          description: Your Amperity tenant ID.
 components:
-  responses:
-    BadRequest:
-      description: Bad Request — the request was malformed or contained invalid parameters.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Unauthorized:
-      description: Authentication Required — no valid Bearer token was provided.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    InternalError:
-      description: Internal Server Error — an unexpected error occurred.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Forbidden:
-      description: Not Authorized — the API key does not have permission for this operation.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
+  parameters:
+    WithTotal:
+      name: with_total
+      in: query
+      required: false
+      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
+
+
+        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
+
+        '
+      schema:
+        type: boolean
+        default: false
+    NextToken:
+      name: next_token
+      in: query
+      required: false
+      description: 'An opaque token that is used to paginate results. Omit the `next_token` property
+
+        to return the first page. Use the cursor value for `next_token` that was returned
+
+        in a response to view the next page of results.
+
+
+        For example: `ABCd1fghIJk2l3M`
+
+
+        > **Note:** The possible values for `next_token` are returned within the 200 response.
+
+
+        > **Important:** The value for `next_token` cannot be null.
+
+        '
+      schema:
+        type: string
+        example: ZVEy1iwsKBs9a6H
+    AmperityTenant:
+      name: amperity-tenant
+      in: header
+      required: true
+      description: The unique identifier for the tenant.
+      schema:
+        type: string
+        example: <tenant-id>
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of records to include in a single page of results.
+      schema:
+        type: integer
+    ApiVersionHeader:
+      name: api-version
+      in: header
+      required: true
+      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
+      schema:
+        type: string
+        enum:
+        - '2024-04-01'
+        - unstable
+        default: unstable
+        example: '2024-04-01'
   schemas:
     ErrorResponse:
       type: object
@@ -501,81 +269,31 @@ components:
           type: string
           description: The identifier for the session from which the action occurred.
           example: Ab1cDeFgHijkLMN2Op3QrStUvWxYZ0123
-  parameters:
-    AmperityTenant:
-      name: amperity-tenant
-      in: header
-      required: true
-      description: The unique identifier for the tenant.
-      schema:
-        type: string
-        example: <tenant-id>
-    ApiVersionHeader:
-      name: api-version
-      in: header
-      required: true
-      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
-      schema:
-        type: string
-        enum:
-        - '2024-04-01'
-        default: '2024-04-01'
-        example: '2024-04-01'
-    NextToken:
-      name: next_token
-      in: query
-      required: false
-      description: 'An opaque token that is used to paginate results. Omit the `next_token` property
-
-        to return the first page. Use the cursor value for `next_token` that was returned
-
-        in a response to view the next page of results.
-
-
-        For example: `ABCd1fghIJk2l3M`
-
-
-        > **Note:** The possible values for `next_token` are returned within the 200 response.
-
-
-        > **Important:** The value for `next_token` cannot be null.
-
-        '
-      schema:
-        type: string
-        example: ZVEy1iwsKBs9a6H
-    WithTotal:
-      name: with_total
-      in: query
-      required: false
-      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
-
-
-        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
-
-        '
-      schema:
-        type: boolean
-        default: false
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: The maximum number of records to include in a single page of results.
-      schema:
-        type: integer
-    ApiVersionHeader_2:
-      name: api-version
-      in: header
-      required: true
-      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
-      schema:
-        type: string
-        enum:
-        - '2024-04-01'
-        - unstable
-        default: unstable
-        example: '2024-04-01'
+  responses:
+    Forbidden:
+      description: Not Authorized — the API key does not have permission for this operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Internal Server Error — an unexpected error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Bad Request — the request was malformed or contained invalid parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication Required — no valid Bearer token was provided.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   securitySchemes:
     BearerAuth:
       type: http
@@ -583,6 +301,3 @@ components:
       description: 'Authenticate using a Bearer token generated from an Amperity API key. Include the token in the Authorization header of every request.
 
         '
-x-refined-from:
-- amperity-control-plane-2024-04-01-openapi.json
-- amperity-control-plane-unstable-openapi.json

@@ -9,39 +9,30 @@ docs:
 - https://docs.amperity.com/api/mcp_setup_claude.html
 - https://docs.amperity.com/api/mcp_setup_chatgpt.html
 - https://docs.amperity.com/api/mcp_setup_m365_copilot.html
-note: >-
-  Amperity publishes and HOSTS an official remote MCP server at https://mcp.amperity.com. Amperity's
+note: 'Amperity publishes and HOSTS an official remote MCP server at https://mcp.amperity.com. Amperity''s
   own documentation states the server is hosted by Amperity, that customers connect to a single public
-  endpoint, and that it is not installed or run locally. The tool list below is transcribed verbatim
-  from Amperity's published MCP tool reference (domain_action naming convention, grouped by domain);
-  it is NOT derived from the REST OpenAPI. A live tools/list against the endpoint returned HTTP 401
-  (www-authenticate: Bearer resource_metadata=.../.well-known/oauth-protected-resource), so per-tool
-  inputSchema requires an authenticated introspection and is not captured here.
+  endpoint, and that it is not installed or run locally. The tool list below is transcribed verbatim from
+  Amperity''s published MCP tool reference (domain_action naming convention, grouped by domain); it is
+  NOT derived from the REST OpenAPI. A live tools/list against the endpoint returned HTTP 401 (www-authenticate:
+  Bearer resource_metadata=.../.well-known/oauth-protected-resource), so per-tool inputSchema requires
+  an authenticated introspection and is not captured here.'
 deployment:
-  mode: remote
-  endpoint: https://mcp.amperity.com
-  auth: oauth
-  verified: probed
-  probe:
-    url: https://mcp.amperity.com
-    method: 'POST jsonrpc tools/list'
-    http_status: 401
-    www_authenticate: 'Bearer resource_metadata="https://mcp.amperity.com/.well-known/oauth-protected-resource"'
-    checked: '2026-08-13'
+  mode: none
+  verified: derived
+  tools: 14
+  checked: '2026-08-12'
+  source: catalog MCP census
 server:
   name: amperity
   transport: http
   url: https://mcp.amperity.com
   hosted_by: Amperity
-  routing: >-
-    The single public URL automatically routes each request to the Amperity stack that hosts the
+  routing: The single public URL automatically routes each request to the Amperity stack that hosts the
     calling user's tenant.
-  isolation: >-
-    Per-user isolation. Each request is authenticated and scoped to the calling user's identity,
+  isolation: Per-user isolation. Each request is authenticated and scoped to the calling user's identity,
     tenant, and permissions. The MCP server does not bypass Amperity authorization.
-  session_state: >-
-    Per-token session state (selected tenant and safety mode) persists across requests within the same
-    session. Conversation history is not stored.
+  session_state: Per-token session state (selected tenant and safety mode) persists across requests within
+    the same session. Conversation history is not stored.
 auth:
   type: oauth2
   flow: authorization_code
@@ -51,7 +42,7 @@ auth:
   token_endpoint: https://mcp.amperity.com/oauth/token
   registration_endpoint: https://mcp.amperity.com/oauth/register
   dynamic_client_registration: true
-  published_client_id: nwbd0MGCyh1VysmYQM05UoDXIuVPdGEs   # published verbatim in the Amperity Claude setup docs
+  published_client_id: nwbd0MGCyh1VysmYQM05UoDXIuVPdGEs
   discovery:
   - well-known/amperity-oauth-authorization-server.json
   - well-known/amperity-oauth-protected-resource.json
@@ -64,9 +55,8 @@ clients:
   docs: https://docs.amperity.com/api/mcp_setup_chatgpt.html
 - name: Microsoft Copilot Studio
   docs: https://docs.amperity.com/api/mcp_setup_m365_copilot.html
-  note: >-
-    Copilot Studio limits how many tools an agent can register, so the Amperity MCP server serves a
-    curated subset of tools to Copilot Studio connections.
+  note: Copilot Studio limits how many tools an agent can register, so the Amperity MCP server serves
+    a curated subset of tools to Copilot Studio connections.
 - name: Gemini (Antigravity, Gemini CLI)
   docs: https://docs.amperity.com/api/mcp_setup_gemini.html
 - name: Snowflake Cortex Agents
@@ -75,37 +65,37 @@ safety_modes:
   docs: https://docs.amperity.com/api/mcp_safety_modes.html
   scope: per-session, per-user
   default: strict
-  control_tools: [safety_get_mode, safety_set_mode]
+  control_tools:
+  - safety_get_mode
+  - safety_set_mode
   modes:
   - mode: strict
     production: Write operations blocked; read operations allowed.
     sandbox: Read and write operations allowed.
   - mode: confirm
-    production: "Write operations require an explicit confirm: true argument from the agent."
+    production: 'Write operations require an explicit confirm: true argument from the agent.'
     sandbox: Read and write operations allowed.
   - mode: unrestricted
     production: All operations allowed without explicit confirmation.
     sandbox: Read and write operations allowed.
   always_confirm:
-    tools: [campaign_schedule, courier_group_run, orchestration_group_run]
-    rule: >-
-      These tools always require safety mode unrestricted AND confirm: true, because they send data to
-      downstream systems outside Amperity.
-  caveat: >-
-    Amperity documents safety mode as a guardrail, not a permission boundary - the agent itself can
-    call safety_set_mode. The true permission boundary is the tool permissions configured in the MCP
+    tools:
+    - campaign_schedule
+    - courier_group_run
+    - orchestration_group_run
+    rule: 'These tools always require safety mode unrestricted AND confirm: true, because they send data
+      to downstream systems outside Amperity.'
+  caveat: Amperity documents safety mode as a guardrail, not a permission boundary - the agent itself
+    can call safety_set_mode. The true permission boundary is the tool permissions configured in the MCP
     client plus the calling user's Amperity policies.
 metering:
   tokens: Metered and billed by the customer's own AI platform, never by Amperity.
-  amps: >-
-    Amperity usage credits are consumed when an agent runs an operation that does work (a database run,
-    identity resolution). Running it through MCP adds no extra amp cost over the UI.
+  amps: Amperity usage credits are consumed when an agent runs an operation that does work (a database
+    run, identity resolution). Running it through MCP adds no extra amp cost over the UI.
 tool_count: 227
-tool_count_source: >-
-  227 tool names transcribed from the published MCP tool reference; Amperity states "more than 200
-  tools" and that tools/list is the canonical, per-account authoritative surface.
+tool_count_source: 227 tool names transcribed from the published MCP tool reference; Amperity states "more
+  than 200 tools" and that tools/list is the canonical, per-account authoritative surface.
 tools:
-# Tenants and sessions
 - name: session_start
   category: tenants-sessions
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -154,7 +144,6 @@ tools:
 - name: feedback_submit
   category: tenants-sessions
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Users and access
 - name: user_list
   category: users-access
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -173,7 +162,6 @@ tools:
 - name: user_revoke_policy
   category: users-access
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Databases and tables
 - name: database_list
   category: databases-tables
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -273,7 +261,6 @@ tools:
 - name: table_run_history_get_table_history
   category: databases-tables
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Queries
 - name: queries_list
   category: queries
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -322,7 +309,6 @@ tools:
 - name: query_folder_delete
   category: queries
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Identity resolution
 - name: stitch_run
   category: identity-resolution
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -356,7 +342,6 @@ tools:
 - name: stitch_get_benchmark_history
   category: identity-resolution
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Amperity Bridge
 - name: bridge_list
   category: bridge
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -408,7 +393,6 @@ tools:
 - name: bridge_load_amperity_data
   category: bridge
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Couriers, feeds, and destinations
 - name: courier_list
   category: couriers-feeds-destinations
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -490,7 +474,6 @@ tools:
 - name: destination_delete_target_template
   category: couriers-feeds-destinations
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Orchestrations
 - name: orchestration_list
   category: orchestrations
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -524,7 +507,6 @@ tools:
 - name: orchestration_group_run
   category: orchestrations
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Campaigns and journeys
 - name: campaign_list
   category: campaigns-journeys
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -597,7 +579,6 @@ tools:
 - name: journey_get_node_schema
   category: campaigns-journeys
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Data exports
 - name: slice_list
   category: data-exports
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -613,7 +594,6 @@ tools:
 - name: slice_delete
   category: data-exports
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Predictions
 - name: prediction_list_models
   category: predictions
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -647,7 +627,6 @@ tools:
 - name: prediction_get_model_config_validation_results
   category: predictions
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Segments
 - name: iq_list
   category: segments
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -693,7 +672,6 @@ tools:
 - name: ai_system_prompt_get
   category: segments
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Labels
 - name: label_list
   category: labels
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -709,7 +687,6 @@ tools:
 - name: label_delete
   category: labels
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Configuration history and recovery
 - name: config_history_search
   category: config-history
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -734,7 +711,6 @@ tools:
 - name: comp_graph_get_dependencies
   category: config-history
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Workflows and compute
 - name: workflow_list
   category: workflows-compute
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -783,7 +759,6 @@ tools:
 - name: compute_update_settings
   category: workflows-compute
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Alerts and training
 - name: alert_list_subscriptions
   category: alerts-training
   source: https://docs.amperity.com/api/mcp_tool_reference.html
@@ -799,7 +774,6 @@ tools:
 - name: training_setup_semantic_tags
   category: alerts-training
   source: https://docs.amperity.com/api/mcp_tool_reference.html
-# Deep links
 - name: build_object_url
   category: deep-links
   source: https://docs.amperity.com/api/mcp_tool_reference.html

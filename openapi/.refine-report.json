@@ -1,0 +1,30 @@
+{
+  "provider": "amperity",
+  "sources": [
+    "_original/amperity-control-plane-unstable-openapi.json"
+  ],
+  "outputs": [
+    "amperity-audit-events-api-openapi.yml",
+    "amperity-campaigns-api-openapi.yml",
+    "amperity-ingest-api-openapi.yml",
+    "amperity-segments-api-openapi.yml",
+    "amperity-workflow-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "1 archived document(s) dropped as subsets of other archived documents",
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "amperity-control-plane-unstable-openapi.json: upgraded openapi 3.0.3 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "_original/amperity-control-plane-2024-04-01-openapi.json: archived document superseded by a larger archived document",
+    "amperity-audit-events-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "amperity-campaigns-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "amperity-ingest-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "amperity-segments-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "amperity-workflow-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
+}
