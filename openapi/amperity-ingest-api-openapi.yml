@@ -135,40 +135,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 components:
-  parameters:
-    WithTotal:
-      name: with_total
-      in: query
-      required: false
-      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
-
-
-        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
-
-        '
-      schema:
-        type: boolean
-        default: false
-    AmperityTenant:
-      name: amperity-tenant
-      in: header
-      required: true
-      description: The unique identifier for the tenant.
-      schema:
-        type: string
-        example: <tenant-id>
-    ApiVersionHeader:
-      name: api-version
-      in: header
-      required: true
-      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
-      schema:
-        type: string
-        enum:
-        - '2024-04-01'
-        - unstable
-        default: unstable
-        example: '2024-04-01'
   schemas:
     ErrorResponse:
       type: object
@@ -186,33 +152,6 @@ components:
           type: string
           description: A description of the error.
           example: An unexpected error occurred.
-    IngestFileDetails:
-      type: object
-      description: Details about a single file processed during an ingest job.
-      required:
-      - file_id
-      - read
-      - errors
-      additionalProperties: false
-      properties:
-        file_id:
-          type: string
-          description: The identifier for the file.
-          example: cb-20240618-71992-SF3Uz/part0.avro
-        name:
-          type: string
-          description: The human-readable identifier for the file.
-          example: part0.avro
-        read:
-          type: integer
-          description: The total count of records processed in this file.
-          example: 1000
-        errors:
-          type: integer
-          description: 'The number of rows with an ingest error. For example, when Amperity cannot match a field value to the expected data type.
-
-            '
-          example: 200
     IngestJobDetails:
       type: object
       description: 'Details for a single ingest job, including a summary of all feeds and files processed.
@@ -237,6 +176,27 @@ components:
           description: A summary of table details from this ingest job.
           items:
             $ref: '#/components/schemas/IngestFeedDetails'
+    IngestJobDetailsList:
+      type: object
+      description: A list of ingest jobs for the specified time window.
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: Ingest job items for the specified time window.
+          items:
+            $ref: '#/components/schemas/IngestJobDetails'
+        next_token:
+          type: string
+          description: 'The next_token parameter is included in the response but is not available for use with the GET /ingest/jobs endpoint.
+
+            '
+          example: ZVEy1iwsKBs9a6H
+        total:
+          type: integer
+          description: The total count of all results. Only returned when with_total is set to true.
     IngestFeedDetails:
       type: object
       description: Details about a single feed processed during an ingest job.
@@ -308,30 +268,70 @@ components:
           description: A collection of file details for each file processed in this feed.
           items:
             $ref: '#/components/schemas/IngestFileDetails'
-    IngestJobDetailsList:
+    IngestFileDetails:
       type: object
-      description: A list of ingest jobs for the specified time window.
+      description: Details about a single file processed during an ingest job.
       required:
-      - data
+      - file_id
+      - read
+      - errors
       additionalProperties: false
       properties:
-        data:
-          type: array
-          description: Ingest job items for the specified time window.
-          items:
-            $ref: '#/components/schemas/IngestJobDetails'
-        next_token:
+        file_id:
           type: string
-          description: 'The next_token parameter is included in the response but is not available for use with the GET /ingest/jobs endpoint.
+          description: The identifier for the file.
+          example: cb-20240618-71992-SF3Uz/part0.avro
+        name:
+          type: string
+          description: The human-readable identifier for the file.
+          example: part0.avro
+        read:
+          type: integer
+          description: The total count of records processed in this file.
+          example: 1000
+        errors:
+          type: integer
+          description: 'The number of rows with an ingest error. For example, when Amperity cannot match a field value to the expected data type.
 
             '
-          example: ZVEy1iwsKBs9a6H
-        total:
-          type: integer
-          description: The total count of all results. Only returned when with_total is set to true.
+          example: 200
+  parameters:
+    ApiVersionHeader:
+      name: api-version
+      in: header
+      required: true
+      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
+      schema:
+        type: string
+        enum:
+        - '2024-04-01'
+        - unstable
+        default: unstable
+        example: '2024-04-01'
+    AmperityTenant:
+      name: amperity-tenant
+      in: header
+      required: true
+      description: The unique identifier for the tenant.
+      schema:
+        type: string
+        example: <tenant-id>
+    WithTotal:
+      name: with_total
+      in: query
+      required: false
+      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
+
+
+        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
+
+        '
+      schema:
+        type: boolean
+        default: false
   responses:
-    Forbidden:
-      description: Not Authorized — the API key does not have permission for this operation.
+    BadRequest:
+      description: Bad Request — the request was malformed or contained invalid parameters.
       content:
         application/json:
           schema:
@@ -342,14 +342,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    BadRequest:
-      description: Bad Request — the request was malformed or contained invalid parameters.
+    Unauthorized:
+      description: Authentication Required — no valid Bearer token was provided.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    Unauthorized:
-      description: Authentication Required — no valid Bearer token was provided.
+    Forbidden:
+      description: Not Authorized — the API key does not have permission for this operation.
       content:
         application/json:
           schema:

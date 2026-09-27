@@ -289,70 +289,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 components:
-  parameters:
-    WithTotal:
-      name: with_total
-      in: query
-      required: false
-      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
-
-
-        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
-
-        '
-      schema:
-        type: boolean
-        default: false
-    NextToken:
-      name: next_token
-      in: query
-      required: false
-      description: 'An opaque token that is used to paginate results. Omit the `next_token` property
-
-        to return the first page. Use the cursor value for `next_token` that was returned
-
-        in a response to view the next page of results.
-
-
-        For example: `ABCd1fghIJk2l3M`
-
-
-        > **Note:** The possible values for `next_token` are returned within the 200 response.
-
-
-        > **Important:** The value for `next_token` cannot be null.
-
-        '
-      schema:
-        type: string
-        example: ZVEy1iwsKBs9a6H
-    AmperityTenant:
-      name: amperity-tenant
-      in: header
-      required: true
-      description: The unique identifier for the tenant.
-      schema:
-        type: string
-        example: <tenant-id>
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: The maximum number of records to include in a single page of results.
-      schema:
-        type: integer
-    ApiVersionHeader:
-      name: api-version
-      in: header
-      required: true
-      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
-      schema:
-        type: string
-        enum:
-        - '2024-04-01'
-        - unstable
-        default: unstable
-        example: '2024-04-01'
   schemas:
     ErrorResponse:
       type: object
@@ -370,149 +306,6 @@ components:
           type: string
           description: A description of the error.
           example: An unexpected error occurred.
-    WorkflowError:
-      type: object
-      description: An error associated with a workflow or workflow task.
-      required:
-      - type
-      - message
-      additionalProperties: false
-      properties:
-        type:
-          type: string
-          description: A period-delimited string that indicates where an error occurred.
-          example: amperity.workflow.task.stitch/table
-        message:
-          type: string
-          description: The error message.
-          example: Found table in an invalid state.
-        attribution:
-          type: string
-          description: 'The source of the error. May be attributed to `customer` or `platform`.
-
-
-            - `customer` indicates the source of the error is one or more configuration issues within Amperity. These issues can often be resolved by updating the configuration, and then restarting or rerunning the workflow.
-
-            - `platform` indicates there is an issue with components or services that Amperity relies on to process the workflow. These issues are often transient and rerunning the workflow will resolve the error. In some cases, this type of error may require help from Amperity Support.
-
-            '
-          example: customer
-        data:
-          description: 'Additional data associated with the error. May be absent or null when no additional data is available.
-
-            '
-    WorkflowList:
-      type: object
-      description: A paginated list of workflows.
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        data:
-          type: array
-          description: Workflow items on this page.
-          items:
-            $ref: '#/components/schemas/Workflow'
-        next_token:
-          type: string
-          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
-
-            '
-          example: ZVEy1iwsKBs9a6H
-        total:
-          type: integer
-          description: The total count of all results. Only returned when with_total is set to true.
-    Workflow:
-      type: object
-      description: A workflow.
-      required:
-      - id
-      - state
-      - type
-      - name
-      - tenant
-      - created_at
-      properties:
-        id:
-          type: string
-          description: The unique identifier for the workflow.
-          example: wf-20240619-14418-6UhqSe
-        state:
-          type: string
-          description: The current state of the workflow.
-          example: succeeded
-        type:
-          type: string
-          description: The type of workflow.
-          example: campaign.send
-        name:
-          type: string
-          description: The name of the workflow.
-          example: Customer Attribute Daily
-        tenant:
-          type: string
-          description: The unique identifier for the tenant.
-          example: <tenant-id>
-        created_at:
-          type: string
-          format: date-time
-          description: The date and time at which a workflow started.
-          example: '2026-06-19T04:00:18.764Z'
-        ended_at:
-          type: string
-          format: date-time
-          description: 'The date and time at which a workflow ended.
-
-
-            > **Note:** The amount of time that elapsed between `created_at` and `ended_at` is the runtime for the workflow.
-
-            '
-          example: '2026-06-19T04:03:10.119Z'
-        principal_id:
-          type: string
-          description: 'A unique identifier for the Amperity user who started the workflow. For example: `google-apps|socktown@socktown.com`.
-
-            '
-          example: google-apps|<tenant-id>@<tenant-id>.com
-        principal_name:
-          type: string
-          description: 'The name of the Amperity user who started the workflow. For example: `Justin Scott` or `Automated workflow`.
-
-            '
-          example: Justin Scott
-        principal_email:
-          type: string
-          description: The email address for the user who started the workflow.
-          example: justin.scott@<tenant-id>.com
-        launched_version:
-          type: string
-          description: 'A unique identifier that describes the configuration state of Amperity at the start of the workflow. The value for this property is similar to: `etv-20240210-12345-6AbCDE`.
-
-            '
-          example: etv-20240210-12345-6AbCDE
-        current_version:
-          type: string
-          description: 'A unique identifier that describes the configuration state of Amperity at the end of the workflow or at the time an error occurred. The value for this property is similar to: `etv-20240210-12345-6AbCDE`.
-
-            '
-          example: etv-20240210-12345-6AbCDE
-        warn_after_ms:
-          type: integer
-          description: 'The length of time in milliseconds after which a warning is sent that notifies users that a workflow is running longer than expected. This parameter only applies to workflows that use SQL to write tables to storage.
-
-            '
-          example: 86400000
-        task_instances:
-          type: array
-          description: The list of tasks in the workflow. Populated only when view is set to verbose.
-          items:
-            $ref: '#/components/schemas/WorkflowTaskInstance'
-        error:
-          allOf:
-          - $ref: '#/components/schemas/WorkflowError'
-          description: 'An error associated with this workflow. Populated only for workflows in an error state.
-
-            '
     WorkflowTaskInstance:
       type: object
       description: A task within a workflow.
@@ -617,6 +410,149 @@ components:
           description: 'An error associated with this task. Populated only for tasks in an error state.
 
             '
+    Workflow:
+      type: object
+      description: A workflow.
+      required:
+      - id
+      - state
+      - type
+      - name
+      - tenant
+      - created_at
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the workflow.
+          example: wf-20240619-14418-6UhqSe
+        state:
+          type: string
+          description: The current state of the workflow.
+          example: succeeded
+        type:
+          type: string
+          description: The type of workflow.
+          example: campaign.send
+        name:
+          type: string
+          description: The name of the workflow.
+          example: Customer Attribute Daily
+        tenant:
+          type: string
+          description: The unique identifier for the tenant.
+          example: <tenant-id>
+        created_at:
+          type: string
+          format: date-time
+          description: The date and time at which a workflow started.
+          example: '2026-06-19T04:00:18.764Z'
+        ended_at:
+          type: string
+          format: date-time
+          description: 'The date and time at which a workflow ended.
+
+
+            > **Note:** The amount of time that elapsed between `created_at` and `ended_at` is the runtime for the workflow.
+
+            '
+          example: '2026-06-19T04:03:10.119Z'
+        principal_id:
+          type: string
+          description: 'A unique identifier for the Amperity user who started the workflow. For example: `google-apps|socktown@socktown.com`.
+
+            '
+          example: google-apps|<tenant-id>@<tenant-id>.com
+        principal_name:
+          type: string
+          description: 'The name of the Amperity user who started the workflow. For example: `Justin Scott` or `Automated workflow`.
+
+            '
+          example: Justin Scott
+        principal_email:
+          type: string
+          description: The email address for the user who started the workflow.
+          example: justin.scott@<tenant-id>.com
+        launched_version:
+          type: string
+          description: 'A unique identifier that describes the configuration state of Amperity at the start of the workflow. The value for this property is similar to: `etv-20240210-12345-6AbCDE`.
+
+            '
+          example: etv-20240210-12345-6AbCDE
+        current_version:
+          type: string
+          description: 'A unique identifier that describes the configuration state of Amperity at the end of the workflow or at the time an error occurred. The value for this property is similar to: `etv-20240210-12345-6AbCDE`.
+
+            '
+          example: etv-20240210-12345-6AbCDE
+        warn_after_ms:
+          type: integer
+          description: 'The length of time in milliseconds after which a warning is sent that notifies users that a workflow is running longer than expected. This parameter only applies to workflows that use SQL to write tables to storage.
+
+            '
+          example: 86400000
+        task_instances:
+          type: array
+          description: The list of tasks in the workflow. Populated only when view is set to verbose.
+          items:
+            $ref: '#/components/schemas/WorkflowTaskInstance'
+        error:
+          allOf:
+          - $ref: '#/components/schemas/WorkflowError'
+          description: 'An error associated with this workflow. Populated only for workflows in an error state.
+
+            '
+    WorkflowList:
+      type: object
+      description: A paginated list of workflows.
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: Workflow items on this page.
+          items:
+            $ref: '#/components/schemas/Workflow'
+        next_token:
+          type: string
+          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
+
+            '
+          example: ZVEy1iwsKBs9a6H
+        total:
+          type: integer
+          description: The total count of all results. Only returned when with_total is set to true.
+    WorkflowError:
+      type: object
+      description: An error associated with a workflow or workflow task.
+      required:
+      - type
+      - message
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          description: A period-delimited string that indicates where an error occurred.
+          example: amperity.workflow.task.stitch/table
+        message:
+          type: string
+          description: The error message.
+          example: Found table in an invalid state.
+        attribution:
+          type: string
+          description: 'The source of the error. May be attributed to `customer` or `platform`.
+
+
+            - `customer` indicates the source of the error is one or more configuration issues within Amperity. These issues can often be resolved by updating the configuration, and then restarting or rerunning the workflow.
+
+            - `platform` indicates there is an issue with components or services that Amperity relies on to process the workflow. These issues are often transient and rerunning the workflow will resolve the error. In some cases, this type of error may require help from Amperity Support.
+
+            '
+          example: customer
+        data:
+          description: 'Additional data associated with the error. May be absent or null when no additional data is available.
+
+            '
     WorkflowRunRequest:
       type: object
       description: The request body used to start a new workflow.
@@ -705,8 +641,8 @@ components:
           default: full
           example: full
   responses:
-    Forbidden:
-      description: Not Authorized — the API key does not have permission for this operation.
+    BadRequest:
+      description: Bad Request — the request was malformed or contained invalid parameters.
       content:
         application/json:
           schema:
@@ -717,8 +653,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    BadRequest:
-      description: Bad Request — the request was malformed or contained invalid parameters.
+    Unauthorized:
+      description: Authentication Required — no valid Bearer token was provided.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Not Authorized — the API key does not have permission for this operation.
       content:
         application/json:
           schema:
@@ -729,12 +671,70 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    Unauthorized:
-      description: Authentication Required — no valid Bearer token was provided.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of records to include in a single page of results.
+      schema:
+        type: integer
+    NextToken:
+      name: next_token
+      in: query
+      required: false
+      description: 'An opaque token that is used to paginate results. Omit the `next_token` property
+
+        to return the first page. Use the cursor value for `next_token` that was returned
+
+        in a response to view the next page of results.
+
+
+        For example: `ABCd1fghIJk2l3M`
+
+
+        > **Note:** The possible values for `next_token` are returned within the 200 response.
+
+
+        > **Important:** The value for `next_token` cannot be null.
+
+        '
+      schema:
+        type: string
+        example: ZVEy1iwsKBs9a6H
+    ApiVersionHeader:
+      name: api-version
+      in: header
+      required: true
+      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
+      schema:
+        type: string
+        enum:
+        - '2024-04-01'
+        - unstable
+        default: unstable
+        example: '2024-04-01'
+    AmperityTenant:
+      name: amperity-tenant
+      in: header
+      required: true
+      description: The unique identifier for the tenant.
+      schema:
+        type: string
+        example: <tenant-id>
+    WithTotal:
+      name: with_total
+      in: query
+      required: false
+      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
+
+
+        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
+
+        '
+      schema:
+        type: boolean
+        default: false
   securitySchemes:
     BearerAuth:
       type: http
