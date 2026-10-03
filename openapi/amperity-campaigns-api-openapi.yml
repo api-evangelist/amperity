@@ -126,6 +126,48 @@ paths:
           $ref: '#/components/responses/InternalError'
 components:
   schemas:
+    CampaignDraftList:
+      type: object
+      description: A paginated list of campaign drafts.
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: Campaign draft items on this page.
+          items:
+            $ref: '#/components/schemas/CampaignDraft'
+        next_token:
+          type: string
+          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
+
+            '
+          example: ZVEy1iwsKBs9a6H
+        total:
+          type: integer
+          description: The total count of all results. Only returned when with_total is set to true.
+    CampaignList:
+      type: object
+      description: A paginated list of campaigns.
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: Campaign items on this page.
+          items:
+            $ref: '#/components/schemas/Campaign'
+        next_token:
+          type: string
+          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
+
+            '
+          example: ZVEy1iwsKBs9a6H
+        total:
+          type: integer
+          description: The total count of all results. Only returned when with_total is set to true.
     ErrorResponse:
       type: object
       description: An error response returned by the API.
@@ -165,27 +207,6 @@ components:
 
             '
           example: '2026-04-22T20:30:00Z'
-    CampaignList:
-      type: object
-      description: A paginated list of campaigns.
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        data:
-          type: array
-          description: Campaign items on this page.
-          items:
-            $ref: '#/components/schemas/Campaign'
-        next_token:
-          type: string
-          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
-
-            '
-          example: ZVEy1iwsKBs9a6H
-        total:
-          type: integer
-          description: The total count of all results. Only returned when with_total is set to true.
     Campaign:
       type: object
       description: A campaign.
@@ -209,34 +230,7 @@ components:
 
             '
           example: '2026-04-22T20:30:00Z'
-    CampaignDraftList:
-      type: object
-      description: A paginated list of campaign drafts.
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        data:
-          type: array
-          description: Campaign draft items on this page.
-          items:
-            $ref: '#/components/schemas/CampaignDraft'
-        next_token:
-          type: string
-          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
-
-            '
-          example: ZVEy1iwsKBs9a6H
-        total:
-          type: integer
-          description: The total count of all results. Only returned when with_total is set to true.
   responses:
-    BadRequest:
-      description: Bad Request — the request was malformed or contained invalid parameters.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
     InternalError:
       description: Internal Server Error — an unexpected error occurred.
       content:
@@ -255,7 +249,41 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Bad Request — the request was malformed or contained invalid parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   parameters:
+    WithTotal:
+      name: with_total
+      in: query
+      required: false
+      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
+
+
+        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
+
+        '
+      schema:
+        type: boolean
+        default: false
+    AmperityTenant:
+      name: amperity-tenant
+      in: header
+      required: true
+      description: The unique identifier for the tenant.
+      schema:
+        type: string
+        example: <tenant-id>
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of records to include in a single page of results.
+      schema:
+        type: integer
     ApiVersionHeader:
       name: api-version
       in: header
@@ -268,13 +296,6 @@ components:
         - unstable
         default: unstable
         example: '2024-04-01'
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: The maximum number of records to include in a single page of results.
-      schema:
-        type: integer
     NextToken:
       name: next_token
       in: query
@@ -298,27 +319,6 @@ components:
       schema:
         type: string
         example: ZVEy1iwsKBs9a6H
-    AmperityTenant:
-      name: amperity-tenant
-      in: header
-      required: true
-      description: The unique identifier for the tenant.
-      schema:
-        type: string
-        example: <tenant-id>
-    WithTotal:
-      name: with_total
-      in: query
-      required: false
-      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
-
-
-        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
-
-        '
-      schema:
-        type: boolean
-        default: false
   securitySchemes:
     BearerAuth:
       type: http

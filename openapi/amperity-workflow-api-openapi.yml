@@ -289,23 +289,38 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 components:
+  responses:
+    InternalError:
+      description: Internal Server Error — an unexpected error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication Required — no valid Bearer token was provided.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Not Authorized — the API key does not have permission for this operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not Found — the requested resource does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Bad Request — the request was malformed or contained invalid parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   schemas:
-    ErrorResponse:
-      type: object
-      description: An error response returned by the API.
-      required:
-      - status
-      - message
-      additionalProperties: false
-      properties:
-        status:
-          type: integer
-          description: The HTTP status code.
-          example: 400
-        message:
-          type: string
-          description: A description of the error.
-          example: An unexpected error occurred.
     WorkflowTaskInstance:
       type: object
       description: A task within a workflow.
@@ -410,6 +425,130 @@ components:
           description: 'An error associated with this task. Populated only for tasks in an error state.
 
             '
+    WorkflowList:
+      type: object
+      description: A paginated list of workflows.
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: Workflow items on this page.
+          items:
+            $ref: '#/components/schemas/Workflow'
+        next_token:
+          type: string
+          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
+
+            '
+          example: ZVEy1iwsKBs9a6H
+        total:
+          type: integer
+          description: The total count of all results. Only returned when with_total is set to true.
+    ErrorResponse:
+      type: object
+      description: An error response returned by the API.
+      required:
+      - status
+      - message
+      additionalProperties: false
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code.
+          example: 400
+        message:
+          type: string
+          description: A description of the error.
+          example: An unexpected error occurred.
+    WorkflowRunRequest:
+      type: object
+      description: The request body used to start a new workflow.
+      required:
+      - config_id
+      additionalProperties: false
+      properties:
+        config_id:
+          type: string
+          description: 'The configuration ID of the workflow. This may be the ID for a courier group,
+
+            orchestration group, or campaign.
+
+
+            You can find the ID for the workflow to be run in the following locations:
+
+
+            - From the Sources page, open the menu in the same row as the courier group, and then select Copy ID.
+
+            - From the Destinations page, open the menu in the same row as the orchestration group, and then select Copy ID.
+
+            - From the Campaigns page, open the menu in the same row as the campaign, and then select Copy ID.
+
+            '
+          default: cg-123ABc4DE
+          example: cg-123ABc4DE
+        range_from:
+          type: string
+          format: date-time
+          description: 'String. Required for file-based workflows. Courier groups only.
+
+
+            > **Important:** A value for `range_from` must be specified for any courier group that is configured to pull files from cloud storage: SFTP, Amazon S3, Azure Blob Storage, or Google Cloud Storage.
+
+
+            A timestamp that defines the start (inclusive) of the time window for which couriers in the workflow should pull data. See the `range_to` request parameter.
+
+
+            A timestamp must be in ISO-8601 format and in Coordinated Universal Time (UTC).
+
+
+            > **Tip:** Use with `range_to` to define a date range within which to look for files. This date range is inclusive of `range_from` and exclusive of `range_to`. Use without `range_to` to define a specific day on which to run the workflow.
+
+            '
+          default: '2026-10-01T00:00:00Z'
+          example: '2026-10-01T00:00:00Z'
+        range_to:
+          type: string
+          format: date-time
+          description: 'String. Optional. Courier groups only.
+
+
+            > **Important:** A value for `range_from` must be specified when `range_to` is included in the request.
+
+
+            A timestamp that defines the end (exclusive) of the time window for which couriers in the workflow should pull data. See the `range_from` request parameter.
+
+
+            A timestamp must be in ISO-8601 format and in Coordinated Universal Time (UTC).
+
+            '
+          default: '2026-10-07T00:00:00Z'
+          example: '2026-10-07T00:00:00Z'
+        run_mode:
+          type: string
+          description: 'String. Optional. Courier groups only.
+
+
+            Indicates the run mode for the courier group workflow. Possible values: `full`, `refresh`, or `source`.
+
+
+            - Use `full` to pull data, refresh domain tables, run Stitch, update databases, then send workflow results downstream. All activations, including orchestrations, campaigns, and journeys, that are associated with this workflow is run.
+
+            - Use `refresh` to pull data, refresh domain tables, run Stitch, and then update databases.
+
+            - Use `source` to pull data and refresh domain tables.
+
+
+            > **Tip:** `run_mode` will default to the run mode that is configured for the scheduled workflow. You may override the configured setting by providing a value for `run_mode` in the request.
+
+            '
+          enum:
+          - source
+          - refresh
+          - full
+          default: full
+          example: full
     Workflow:
       type: object
       description: A workflow.
@@ -501,27 +640,6 @@ components:
           description: 'An error associated with this workflow. Populated only for workflows in an error state.
 
             '
-    WorkflowList:
-      type: object
-      description: A paginated list of workflows.
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        data:
-          type: array
-          description: Workflow items on this page.
-          items:
-            $ref: '#/components/schemas/Workflow'
-        next_token:
-          type: string
-          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
-
-            '
-          example: ZVEy1iwsKBs9a6H
-        total:
-          type: integer
-          description: The total count of all results. Only returned when with_total is set to true.
     WorkflowError:
       type: object
       description: An error associated with a workflow or workflow task.
@@ -553,125 +671,28 @@ components:
           description: 'Additional data associated with the error. May be absent or null when no additional data is available.
 
             '
-    WorkflowRunRequest:
-      type: object
-      description: The request body used to start a new workflow.
-      required:
-      - config_id
-      additionalProperties: false
-      properties:
-        config_id:
-          type: string
-          description: 'The configuration ID of the workflow. This may be the ID for a courier group,
-
-            orchestration group, or campaign.
-
-
-            You can find the ID for the workflow to be run in the following locations:
-
-
-            - From the Sources page, open the menu in the same row as the courier group, and then select Copy ID.
-
-            - From the Destinations page, open the menu in the same row as the orchestration group, and then select Copy ID.
-
-            - From the Campaigns page, open the menu in the same row as the campaign, and then select Copy ID.
-
-            '
-          default: cg-123ABc4DE
-          example: cg-123ABc4DE
-        range_from:
-          type: string
-          format: date-time
-          description: 'String. Required for file-based workflows. Courier groups only.
-
-
-            > **Important:** A value for `range_from` must be specified for any courier group that is configured to pull files from cloud storage: SFTP, Amazon S3, Azure Blob Storage, or Google Cloud Storage.
-
-
-            A timestamp that defines the start (inclusive) of the time window for which couriers in the workflow should pull data. See the `range_to` request parameter.
-
-
-            A timestamp must be in ISO-8601 format and in Coordinated Universal Time (UTC).
-
-
-            > **Tip:** Use with `range_to` to define a date range within which to look for files. This date range is inclusive of `range_from` and exclusive of `range_to`. Use without `range_to` to define a specific day on which to run the workflow.
-
-            '
-          default: '2026-10-01T00:00:00Z'
-          example: '2026-10-01T00:00:00Z'
-        range_to:
-          type: string
-          format: date-time
-          description: 'String. Optional. Courier groups only.
-
-
-            > **Important:** A value for `range_from` must be specified when `range_to` is included in the request.
-
-
-            A timestamp that defines the end (exclusive) of the time window for which couriers in the workflow should pull data. See the `range_from` request parameter.
-
-
-            A timestamp must be in ISO-8601 format and in Coordinated Universal Time (UTC).
-
-            '
-          default: '2026-10-07T00:00:00Z'
-          example: '2026-10-07T00:00:00Z'
-        run_mode:
-          type: string
-          description: 'String. Optional. Courier groups only.
-
-
-            Indicates the run mode for the courier group workflow. Possible values: `full`, `refresh`, or `source`.
-
-
-            - Use `full` to pull data, refresh domain tables, run Stitch, update databases, then send workflow results downstream. All activations, including orchestrations, campaigns, and journeys, that are associated with this workflow is run.
-
-            - Use `refresh` to pull data, refresh domain tables, run Stitch, and then update databases.
-
-            - Use `source` to pull data and refresh domain tables.
-
-
-            > **Tip:** `run_mode` will default to the run mode that is configured for the scheduled workflow. You may override the configured setting by providing a value for `run_mode` in the request.
-
-            '
-          enum:
-          - source
-          - refresh
-          - full
-          default: full
-          example: full
-  responses:
-    BadRequest:
-      description: Bad Request — the request was malformed or contained invalid parameters.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    InternalError:
-      description: Internal Server Error — an unexpected error occurred.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Unauthorized:
-      description: Authentication Required — no valid Bearer token was provided.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Forbidden:
-      description: Not Authorized — the API key does not have permission for this operation.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    NotFound:
-      description: Not Found — the requested resource does not exist.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
   parameters:
+    WithTotal:
+      name: with_total
+      in: query
+      required: false
+      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
+
+
+        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
+
+        '
+      schema:
+        type: boolean
+        default: false
+    AmperityTenant:
+      name: amperity-tenant
+      in: header
+      required: true
+      description: The unique identifier for the tenant.
+      schema:
+        type: string
+        example: <tenant-id>
     Limit:
       name: limit
       in: query
@@ -679,6 +700,18 @@ components:
       description: The maximum number of records to include in a single page of results.
       schema:
         type: integer
+    ApiVersionHeader:
+      name: api-version
+      in: header
+      required: true
+      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
+      schema:
+        type: string
+        enum:
+        - '2024-04-01'
+        - unstable
+        default: unstable
+        example: '2024-04-01'
     NextToken:
       name: next_token
       in: query
@@ -702,39 +735,6 @@ components:
       schema:
         type: string
         example: ZVEy1iwsKBs9a6H
-    ApiVersionHeader:
-      name: api-version
-      in: header
-      required: true
-      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
-      schema:
-        type: string
-        enum:
-        - '2024-04-01'
-        - unstable
-        default: unstable
-        example: '2024-04-01'
-    AmperityTenant:
-      name: amperity-tenant
-      in: header
-      required: true
-      description: The unique identifier for the tenant.
-      schema:
-        type: string
-        example: <tenant-id>
-    WithTotal:
-      name: with_total
-      in: query
-      required: false
-      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
-
-
-        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
-
-        '
-      schema:
-        type: boolean
-        default: false
   securitySchemes:
     BearerAuth:
       type: http
