@@ -136,6 +136,73 @@ paths:
           $ref: '#/components/responses/InternalError'
 components:
   schemas:
+    ErrorResponse:
+      type: object
+      description: An error response returned by the API.
+      required:
+      - status
+      - message
+      additionalProperties: false
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code.
+          example: 400
+        message:
+          type: string
+          description: A description of the error.
+          example: An unexpected error occurred.
+    IngestFileDetails:
+      type: object
+      description: Details about a single file processed during an ingest job.
+      required:
+      - file_id
+      - read
+      - errors
+      additionalProperties: false
+      properties:
+        file_id:
+          type: string
+          description: The identifier for the file.
+          example: cb-20240618-71992-SF3Uz/part0.avro
+        name:
+          type: string
+          description: The human-readable identifier for the file.
+          example: part0.avro
+        read:
+          type: integer
+          description: The total count of records processed in this file.
+          example: 1000
+        errors:
+          type: integer
+          description: 'The number of rows with an ingest error. For example, when Amperity cannot match a field value to the expected data type.
+
+            '
+          example: 200
+    IngestJobDetails:
+      type: object
+      description: 'Details for a single ingest job, including a summary of all feeds and files processed.
+
+        '
+      required:
+      - id
+      - workflow_id
+      - tables
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: The ingest job identifier.
+          example: isj-1f73r9u2
+        workflow_id:
+          type: string
+          description: The Amperity internal identifier for the workflow that ran this job.
+          example: wf-20240618-3423-b45
+        tables:
+          type: array
+          description: A summary of table details from this ingest job.
+          items:
+            $ref: '#/components/schemas/IngestFeedDetails'
     IngestJobDetailsList:
       type: object
       description: A list of ingest jobs for the specified time window.
@@ -157,22 +224,6 @@ components:
         total:
           type: integer
           description: The total count of all results. Only returned when with_total is set to true.
-    ErrorResponse:
-      type: object
-      description: An error response returned by the API.
-      required:
-      - status
-      - message
-      additionalProperties: false
-      properties:
-        status:
-          type: integer
-          description: The HTTP status code.
-          example: 400
-        message:
-          type: string
-          description: A description of the error.
-          example: An unexpected error occurred.
     IngestFeedDetails:
       type: object
       description: Details about a single feed processed during an ingest job.
@@ -244,66 +295,15 @@ components:
           description: A collection of file details for each file processed in this feed.
           items:
             $ref: '#/components/schemas/IngestFileDetails'
-    IngestFileDetails:
-      type: object
-      description: Details about a single file processed during an ingest job.
-      required:
-      - file_id
-      - read
-      - errors
-      additionalProperties: false
-      properties:
-        file_id:
-          type: string
-          description: The identifier for the file.
-          example: cb-20240618-71992-SF3Uz/part0.avro
-        name:
-          type: string
-          description: The human-readable identifier for the file.
-          example: part0.avro
-        read:
-          type: integer
-          description: The total count of records processed in this file.
-          example: 1000
-        errors:
-          type: integer
-          description: 'The number of rows with an ingest error. For example, when Amperity cannot match a field value to the expected data type.
-
-            '
-          example: 200
-    IngestJobDetails:
-      type: object
-      description: 'Details for a single ingest job, including a summary of all feeds and files processed.
-
-        '
-      required:
-      - id
-      - workflow_id
-      - tables
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-          description: The ingest job identifier.
-          example: isj-1f73r9u2
-        workflow_id:
-          type: string
-          description: The Amperity internal identifier for the workflow that ran this job.
-          example: wf-20240618-3423-b45
-        tables:
-          type: array
-          description: A summary of table details from this ingest job.
-          items:
-            $ref: '#/components/schemas/IngestFeedDetails'
   responses:
-    InternalError:
-      description: Internal Server Error — an unexpected error occurred.
+    Unauthorized:
+      description: Authentication Required — no valid Bearer token was provided.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    Unauthorized:
-      description: Authentication Required — no valid Bearer token was provided.
+    InternalError:
+      description: Internal Server Error — an unexpected error occurred.
       content:
         application/json:
           schema:
@@ -327,6 +327,18 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
   parameters:
+    ApiVersionHeader:
+      name: api-version
+      in: header
+      required: true
+      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
+      schema:
+        type: string
+        enum:
+        - '2024-04-01'
+        - unstable
+        default: unstable
+        example: '2024-04-01'
     WithTotal:
       name: with_total
       in: query
@@ -348,18 +360,6 @@ components:
       schema:
         type: string
         example: <tenant-id>
-    ApiVersionHeader:
-      name: api-version
-      in: header
-      required: true
-      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
-      schema:
-        type: string
-        enum:
-        - '2024-04-01'
-        - unstable
-        default: unstable
-        example: '2024-04-01'
   securitySchemes:
     BearerAuth:
       type: http

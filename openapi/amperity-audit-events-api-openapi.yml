@@ -90,95 +90,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 components:
-  responses:
-    InternalError:
-      description: Internal Server Error — an unexpected error occurred.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Unauthorized:
-      description: Authentication Required — no valid Bearer token was provided.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Forbidden:
-      description: Not Authorized — the API key does not have permission for this operation.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    BadRequest:
-      description: Bad Request — the request was malformed or contained invalid parameters.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-  parameters:
-    WithTotal:
-      name: with_total
-      in: query
-      required: false
-      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
-
-
-        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
-
-        '
-      schema:
-        type: boolean
-        default: false
-    AmperityTenant:
-      name: amperity-tenant
-      in: header
-      required: true
-      description: The unique identifier for the tenant.
-      schema:
-        type: string
-        example: <tenant-id>
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: The maximum number of records to include in a single page of results.
-      schema:
-        type: integer
-    ApiVersionHeader:
-      name: api-version
-      in: header
-      required: true
-      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
-      schema:
-        type: string
-        enum:
-        - '2024-04-01'
-        - unstable
-        default: unstable
-        example: '2024-04-01'
-    NextToken:
-      name: next_token
-      in: query
-      required: false
-      description: 'An opaque token that is used to paginate results. Omit the `next_token` property
-
-        to return the first page. Use the cursor value for `next_token` that was returned
-
-        in a response to view the next page of results.
-
-
-        For example: `ABCd1fghIJk2l3M`
-
-
-        > **Note:** The possible values for `next_token` are returned within the 200 response.
-
-
-        > **Important:** The value for `next_token` cannot be null.
-
-        '
-      schema:
-        type: string
-        example: ZVEy1iwsKBs9a6H
   schemas:
     ErrorResponse:
       type: object
@@ -196,6 +107,27 @@ components:
           type: string
           description: A description of the error.
           example: An unexpected error occurred.
+    AuditEventList:
+      type: object
+      description: A paginated list of audit events.
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: Audit event items on this page.
+          items:
+            $ref: '#/components/schemas/AuditEvent'
+        next_token:
+          type: string
+          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
+
+            '
+          example: ZVEy1iwsKBs9a6H
+        total:
+          type: integer
+          description: The total count of all results. Only returned when with_total is set to true.
     AuditEvent:
       type: object
       description: A record of user activity that occurred within your tenant.
@@ -273,27 +205,95 @@ components:
           type: string
           description: The identifier for the session from which the action occurred.
           example: Ab1cDeFgHijkLMN2Op3QrStUvWxYZ0123
-    AuditEventList:
-      type: object
-      description: A paginated list of audit events.
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        data:
-          type: array
-          description: Audit event items on this page.
-          items:
-            $ref: '#/components/schemas/AuditEvent'
-        next_token:
-          type: string
-          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
+  responses:
+    Unauthorized:
+      description: Authentication Required — no valid Bearer token was provided.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Internal Server Error — an unexpected error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Not Authorized — the API key does not have permission for this operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Bad Request — the request was malformed or contained invalid parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of records to include in a single page of results.
+      schema:
+        type: integer
+    NextToken:
+      name: next_token
+      in: query
+      required: false
+      description: 'An opaque token that is used to paginate results. Omit the `next_token` property
 
-            '
-          example: ZVEy1iwsKBs9a6H
-        total:
-          type: integer
-          description: The total count of all results. Only returned when with_total is set to true.
+        to return the first page. Use the cursor value for `next_token` that was returned
+
+        in a response to view the next page of results.
+
+
+        For example: `ABCd1fghIJk2l3M`
+
+
+        > **Note:** The possible values for `next_token` are returned within the 200 response.
+
+
+        > **Important:** The value for `next_token` cannot be null.
+
+        '
+      schema:
+        type: string
+        example: ZVEy1iwsKBs9a6H
+    ApiVersionHeader:
+      name: api-version
+      in: header
+      required: true
+      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
+      schema:
+        type: string
+        enum:
+        - '2024-04-01'
+        - unstable
+        default: unstable
+        example: '2024-04-01'
+    WithTotal:
+      name: with_total
+      in: query
+      required: false
+      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
+
+
+        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
+
+        '
+      schema:
+        type: boolean
+        default: false
+    AmperityTenant:
+      name: amperity-tenant
+      in: header
+      required: true
+      description: The unique identifier for the tenant.
+      schema:
+        type: string
+        example: <tenant-id>
   securitySchemes:
     BearerAuth:
       type: http
