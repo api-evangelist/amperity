@@ -56,65 +56,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 components:
-  schemas:
-    ErrorResponse:
-      type: object
-      description: An error response returned by the API.
-      required:
-      - status
-      - message
-      additionalProperties: false
-      properties:
-        status:
-          type: integer
-          description: The HTTP status code.
-          example: 400
-        message:
-          type: string
-          description: A description of the error.
-          example: An unexpected error occurred.
-    Segment:
-      type: object
-      description: A segment.
-      required:
-      - id
-      - name
-      - status
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-          description: The Amperity internal identifier for the segment.
-          example: seg-35GMWpn6Y
-        name:
-          type: string
-          description: The name of the segment.
-          example: Returning Customers
-        status:
-          type: string
-          description: The current status of the segment.
-          example: active
-    SegmentList:
-      type: object
-      description: A paginated list of segments.
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        data:
-          type: array
-          description: Segment items on this page.
-          items:
-            $ref: '#/components/schemas/Segment'
-        next_token:
-          type: string
-          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
-
-            '
-          example: ZVEy1iwsKBs9a6H
-        total:
-          type: integer
-          description: The total count of all results. Only returned when with_total is set to true.
   parameters:
     NextToken:
       name: next_token
@@ -139,13 +80,6 @@ components:
       schema:
         type: string
         example: ZVEy1iwsKBs9a6H
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: The maximum number of records to include in a single page of results.
-      schema:
-        type: integer
     ApiVersionHeader:
       name: api-version
       in: header
@@ -171,6 +105,13 @@ components:
       schema:
         type: boolean
         default: false
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of records to include in a single page of results.
+      schema:
+        type: integer
     AmperityTenant:
       name: amperity-tenant
       in: header
@@ -180,12 +121,6 @@ components:
         type: string
         example: <tenant-id>
   responses:
-    Unauthorized:
-      description: Authentication Required — no valid Bearer token was provided.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
     InternalError:
       description: Internal Server Error — an unexpected error occurred.
       content:
@@ -198,12 +133,77 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication Required — no valid Bearer token was provided.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
     BadRequest:
       description: Bad Request — the request was malformed or contained invalid parameters.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    SegmentList:
+      type: object
+      description: A paginated list of segments.
+      required:
+      - data
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          description: Segment items on this page.
+          items:
+            $ref: '#/components/schemas/Segment'
+        next_token:
+          type: string
+          description: 'The cursor value to use in a subsequent request to return the next page of results. When empty, the last page has been returned.
+
+            '
+          example: ZVEy1iwsKBs9a6H
+        total:
+          type: integer
+          description: The total count of all results. Only returned when with_total is set to true.
+    Segment:
+      type: object
+      description: A segment.
+      required:
+      - id
+      - name
+      - status
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: The Amperity internal identifier for the segment.
+          example: seg-35GMWpn6Y
+        name:
+          type: string
+          description: The name of the segment.
+          example: Returning Customers
+        status:
+          type: string
+          description: The current status of the segment.
+          example: active
+    ErrorResponse:
+      type: object
+      description: An error response returned by the API.
+      required:
+      - status
+      - message
+      additionalProperties: false
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code.
+          example: 400
+        message:
+          type: string
+          description: A description of the error.
+          example: An unexpected error occurred.
   securitySchemes:
     BearerAuth:
       type: http

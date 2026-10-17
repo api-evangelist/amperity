@@ -289,54 +289,189 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 components:
+  parameters:
+    ApiVersionHeader:
+      name: api-version
+      in: header
+      required: true
+      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
+      schema:
+        type: string
+        enum:
+        - '2024-04-01'
+        - unstable
+        default: unstable
+        example: '2024-04-01'
+    WithTotal:
+      name: with_total
+      in: query
+      required: false
+      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
+
+
+        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
+
+        '
+      schema:
+        type: boolean
+        default: false
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of records to include in a single page of results.
+      schema:
+        type: integer
+    AmperityTenant:
+      name: amperity-tenant
+      in: header
+      required: true
+      description: The unique identifier for the tenant.
+      schema:
+        type: string
+        example: <tenant-id>
+    NextToken:
+      name: next_token
+      in: query
+      required: false
+      description: 'An opaque token that is used to paginate results. Omit the `next_token` property
+
+        to return the first page. Use the cursor value for `next_token` that was returned
+
+        in a response to view the next page of results.
+
+
+        For example: `ABCd1fghIJk2l3M`
+
+
+        > **Note:** The possible values for `next_token` are returned within the 200 response.
+
+
+        > **Important:** The value for `next_token` cannot be null.
+
+        '
+      schema:
+        type: string
+        example: ZVEy1iwsKBs9a6H
+  responses:
+    InternalError:
+      description: Internal Server Error — an unexpected error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Not Authorized — the API key does not have permission for this operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Not Found — the requested resource does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication Required — no valid Bearer token was provided.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Bad Request — the request was malformed or contained invalid parameters.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   schemas:
-    ErrorResponse:
+    WorkflowRunRequest:
       type: object
-      description: An error response returned by the API.
+      description: The request body used to start a new workflow.
       required:
-      - status
-      - message
+      - config_id
       additionalProperties: false
       properties:
-        status:
-          type: integer
-          description: The HTTP status code.
-          example: 400
-        message:
+        config_id:
           type: string
-          description: A description of the error.
-          example: An unexpected error occurred.
-    WorkflowError:
-      type: object
-      description: An error associated with a workflow or workflow task.
-      required:
-      - type
-      - message
-      additionalProperties: false
-      properties:
-        type:
-          type: string
-          description: A period-delimited string that indicates where an error occurred.
-          example: amperity.workflow.task.stitch/table
-        message:
-          type: string
-          description: The error message.
-          example: Found table in an invalid state.
-        attribution:
-          type: string
-          description: 'The source of the error. May be attributed to `customer` or `platform`.
+          description: 'The configuration ID of the workflow. This may be the ID for a courier group,
+
+            orchestration group, or campaign.
 
 
-            - `customer` indicates the source of the error is one or more configuration issues within Amperity. These issues can often be resolved by updating the configuration, and then restarting or rerunning the workflow.
+            You can find the ID for the workflow to be run in the following locations:
 
-            - `platform` indicates there is an issue with components or services that Amperity relies on to process the workflow. These issues are often transient and rerunning the workflow will resolve the error. In some cases, this type of error may require help from Amperity Support.
+
+            - From the Sources page, open the menu in the same row as the courier group, and then select Copy ID.
+
+            - From the Destinations page, open the menu in the same row as the orchestration group, and then select Copy ID.
+
+            - From the Campaigns page, open the menu in the same row as the campaign, and then select Copy ID.
 
             '
-          example: customer
-        data:
-          description: 'Additional data associated with the error. May be absent or null when no additional data is available.
+          default: cg-123ABc4DE
+          example: cg-123ABc4DE
+        range_from:
+          type: string
+          format: date-time
+          description: 'String. Required for file-based workflows. Courier groups only.
+
+
+            > **Important:** A value for `range_from` must be specified for any courier group that is configured to pull files from cloud storage: SFTP, Amazon S3, Azure Blob Storage, or Google Cloud Storage.
+
+
+            A timestamp that defines the start (inclusive) of the time window for which couriers in the workflow should pull data. See the `range_to` request parameter.
+
+
+            A timestamp must be in ISO-8601 format and in Coordinated Universal Time (UTC).
+
+
+            > **Tip:** Use with `range_to` to define a date range within which to look for files. This date range is inclusive of `range_from` and exclusive of `range_to`. Use without `range_to` to define a specific day on which to run the workflow.
 
             '
+          default: '2026-10-01T00:00:00Z'
+          example: '2026-10-01T00:00:00Z'
+        range_to:
+          type: string
+          format: date-time
+          description: 'String. Optional. Courier groups only.
+
+
+            > **Important:** A value for `range_from` must be specified when `range_to` is included in the request.
+
+
+            A timestamp that defines the end (exclusive) of the time window for which couriers in the workflow should pull data. See the `range_from` request parameter.
+
+
+            A timestamp must be in ISO-8601 format and in Coordinated Universal Time (UTC).
+
+            '
+          default: '2026-10-07T00:00:00Z'
+          example: '2026-10-07T00:00:00Z'
+        run_mode:
+          type: string
+          description: 'String. Optional. Courier groups only.
+
+
+            Indicates the run mode for the courier group workflow. Possible values: `full`, `refresh`, or `source`.
+
+
+            - Use `full` to pull data, refresh domain tables, run Stitch, update databases, then send workflow results downstream. All activations, including orchestrations, campaigns, and journeys, that are associated with this workflow is run.
+
+            - Use `refresh` to pull data, refresh domain tables, run Stitch, and then update databases.
+
+            - Use `source` to pull data and refresh domain tables.
+
+
+            > **Tip:** `run_mode` will default to the run mode that is configured for the scheduled workflow. You may override the configured setting by providing a value for `run_mode` in the request.
+
+            '
+          enum:
+          - source
+          - refresh
+          - full
+          default: full
+          example: full
     Workflow:
       type: object
       description: A workflow.
@@ -532,93 +667,53 @@ components:
           description: 'An error associated with this task. Populated only for tasks in an error state.
 
             '
-    WorkflowRunRequest:
+    WorkflowError:
       type: object
-      description: The request body used to start a new workflow.
+      description: An error associated with a workflow or workflow task.
       required:
-      - config_id
+      - type
+      - message
       additionalProperties: false
       properties:
-        config_id:
+        type:
           type: string
-          description: 'The configuration ID of the workflow. This may be the ID for a courier group,
+          description: A period-delimited string that indicates where an error occurred.
+          example: amperity.workflow.task.stitch/table
+        message:
+          type: string
+          description: The error message.
+          example: Found table in an invalid state.
+        attribution:
+          type: string
+          description: 'The source of the error. May be attributed to `customer` or `platform`.
 
-            orchestration group, or campaign.
 
+            - `customer` indicates the source of the error is one or more configuration issues within Amperity. These issues can often be resolved by updating the configuration, and then restarting or rerunning the workflow.
 
-            You can find the ID for the workflow to be run in the following locations:
-
-
-            - From the Sources page, open the menu in the same row as the courier group, and then select Copy ID.
-
-            - From the Destinations page, open the menu in the same row as the orchestration group, and then select Copy ID.
-
-            - From the Campaigns page, open the menu in the same row as the campaign, and then select Copy ID.
+            - `platform` indicates there is an issue with components or services that Amperity relies on to process the workflow. These issues are often transient and rerunning the workflow will resolve the error. In some cases, this type of error may require help from Amperity Support.
 
             '
-          default: cg-123ABc4DE
-          example: cg-123ABc4DE
-        range_from:
-          type: string
-          format: date-time
-          description: 'String. Required for file-based workflows. Courier groups only.
-
-
-            > **Important:** A value for `range_from` must be specified for any courier group that is configured to pull files from cloud storage: SFTP, Amazon S3, Azure Blob Storage, or Google Cloud Storage.
-
-
-            A timestamp that defines the start (inclusive) of the time window for which couriers in the workflow should pull data. See the `range_to` request parameter.
-
-
-            A timestamp must be in ISO-8601 format and in Coordinated Universal Time (UTC).
-
-
-            > **Tip:** Use with `range_to` to define a date range within which to look for files. This date range is inclusive of `range_from` and exclusive of `range_to`. Use without `range_to` to define a specific day on which to run the workflow.
+          example: customer
+        data:
+          description: 'Additional data associated with the error. May be absent or null when no additional data is available.
 
             '
-          default: '2026-10-01T00:00:00Z'
-          example: '2026-10-01T00:00:00Z'
-        range_to:
+    ErrorResponse:
+      type: object
+      description: An error response returned by the API.
+      required:
+      - status
+      - message
+      additionalProperties: false
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code.
+          example: 400
+        message:
           type: string
-          format: date-time
-          description: 'String. Optional. Courier groups only.
-
-
-            > **Important:** A value for `range_from` must be specified when `range_to` is included in the request.
-
-
-            A timestamp that defines the end (exclusive) of the time window for which couriers in the workflow should pull data. See the `range_from` request parameter.
-
-
-            A timestamp must be in ISO-8601 format and in Coordinated Universal Time (UTC).
-
-            '
-          default: '2026-10-07T00:00:00Z'
-          example: '2026-10-07T00:00:00Z'
-        run_mode:
-          type: string
-          description: 'String. Optional. Courier groups only.
-
-
-            Indicates the run mode for the courier group workflow. Possible values: `full`, `refresh`, or `source`.
-
-
-            - Use `full` to pull data, refresh domain tables, run Stitch, update databases, then send workflow results downstream. All activations, including orchestrations, campaigns, and journeys, that are associated with this workflow is run.
-
-            - Use `refresh` to pull data, refresh domain tables, run Stitch, and then update databases.
-
-            - Use `source` to pull data and refresh domain tables.
-
-
-            > **Tip:** `run_mode` will default to the run mode that is configured for the scheduled workflow. You may override the configured setting by providing a value for `run_mode` in the request.
-
-            '
-          enum:
-          - source
-          - refresh
-          - full
-          default: full
-          example: full
+          description: A description of the error.
+          example: An unexpected error occurred.
     WorkflowList:
       type: object
       description: A paginated list of workflows.
@@ -640,101 +735,6 @@ components:
         total:
           type: integer
           description: The total count of all results. Only returned when with_total is set to true.
-  parameters:
-    NextToken:
-      name: next_token
-      in: query
-      required: false
-      description: 'An opaque token that is used to paginate results. Omit the `next_token` property
-
-        to return the first page. Use the cursor value for `next_token` that was returned
-
-        in a response to view the next page of results.
-
-
-        For example: `ABCd1fghIJk2l3M`
-
-
-        > **Note:** The possible values for `next_token` are returned within the 200 response.
-
-
-        > **Important:** The value for `next_token` cannot be null.
-
-        '
-      schema:
-        type: string
-        example: ZVEy1iwsKBs9a6H
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: The maximum number of records to include in a single page of results.
-      schema:
-        type: integer
-    ApiVersionHeader:
-      name: api-version
-      in: header
-      required: true
-      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
-      schema:
-        type: string
-        enum:
-        - '2024-04-01'
-        - unstable
-        default: unstable
-        example: '2024-04-01'
-    WithTotal:
-      name: with_total
-      in: query
-      required: false
-      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
-
-
-        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
-
-        '
-      schema:
-        type: boolean
-        default: false
-    AmperityTenant:
-      name: amperity-tenant
-      in: header
-      required: true
-      description: The unique identifier for the tenant.
-      schema:
-        type: string
-        example: <tenant-id>
-  responses:
-    Unauthorized:
-      description: Authentication Required — no valid Bearer token was provided.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    InternalError:
-      description: Internal Server Error — an unexpected error occurred.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    Forbidden:
-      description: Not Authorized — the API key does not have permission for this operation.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    NotFound:
-      description: Not Found — the requested resource does not exist.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    BadRequest:
-      description: Bad Request — the request was malformed or contained invalid parameters.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
   securitySchemes:
     BearerAuth:
       type: http

@@ -136,22 +136,27 @@ paths:
           $ref: '#/components/responses/InternalError'
 components:
   schemas:
-    ErrorResponse:
+    IngestJobDetailsList:
       type: object
-      description: An error response returned by the API.
+      description: A list of ingest jobs for the specified time window.
       required:
-      - status
-      - message
+      - data
       additionalProperties: false
       properties:
-        status:
-          type: integer
-          description: The HTTP status code.
-          example: 400
-        message:
+        data:
+          type: array
+          description: Ingest job items for the specified time window.
+          items:
+            $ref: '#/components/schemas/IngestJobDetails'
+        next_token:
           type: string
-          description: A description of the error.
-          example: An unexpected error occurred.
+          description: 'The next_token parameter is included in the response but is not available for use with the GET /ingest/jobs endpoint.
+
+            '
+          example: ZVEy1iwsKBs9a6H
+        total:
+          type: integer
+          description: The total count of all results. Only returned when with_total is set to true.
     IngestFileDetails:
       type: object
       description: Details about a single file processed during an ingest job.
@@ -179,51 +184,6 @@ components:
 
             '
           example: 200
-    IngestJobDetails:
-      type: object
-      description: 'Details for a single ingest job, including a summary of all feeds and files processed.
-
-        '
-      required:
-      - id
-      - workflow_id
-      - tables
-      additionalProperties: false
-      properties:
-        id:
-          type: string
-          description: The ingest job identifier.
-          example: isj-1f73r9u2
-        workflow_id:
-          type: string
-          description: The Amperity internal identifier for the workflow that ran this job.
-          example: wf-20240618-3423-b45
-        tables:
-          type: array
-          description: A summary of table details from this ingest job.
-          items:
-            $ref: '#/components/schemas/IngestFeedDetails'
-    IngestJobDetailsList:
-      type: object
-      description: A list of ingest jobs for the specified time window.
-      required:
-      - data
-      additionalProperties: false
-      properties:
-        data:
-          type: array
-          description: Ingest job items for the specified time window.
-          items:
-            $ref: '#/components/schemas/IngestJobDetails'
-        next_token:
-          type: string
-          description: 'The next_token parameter is included in the response but is not available for use with the GET /ingest/jobs endpoint.
-
-            '
-          example: ZVEy1iwsKBs9a6H
-        total:
-          type: integer
-          description: The total count of all results. Only returned when with_total is set to true.
     IngestFeedDetails:
       type: object
       description: Details about a single feed processed during an ingest job.
@@ -295,13 +255,81 @@ components:
           description: A collection of file details for each file processed in this feed.
           items:
             $ref: '#/components/schemas/IngestFileDetails'
+    ErrorResponse:
+      type: object
+      description: An error response returned by the API.
+      required:
+      - status
+      - message
+      additionalProperties: false
+      properties:
+        status:
+          type: integer
+          description: The HTTP status code.
+          example: 400
+        message:
+          type: string
+          description: A description of the error.
+          example: An unexpected error occurred.
+    IngestJobDetails:
+      type: object
+      description: 'Details for a single ingest job, including a summary of all feeds and files processed.
+
+        '
+      required:
+      - id
+      - workflow_id
+      - tables
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: The ingest job identifier.
+          example: isj-1f73r9u2
+        workflow_id:
+          type: string
+          description: The Amperity internal identifier for the workflow that ran this job.
+          example: wf-20240618-3423-b45
+        tables:
+          type: array
+          description: A summary of table details from this ingest job.
+          items:
+            $ref: '#/components/schemas/IngestFeedDetails'
+  parameters:
+    ApiVersionHeader:
+      name: api-version
+      in: header
+      required: true
+      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
+      schema:
+        type: string
+        enum:
+        - '2024-04-01'
+        - unstable
+        default: unstable
+        example: '2024-04-01'
+    AmperityTenant:
+      name: amperity-tenant
+      in: header
+      required: true
+      description: The unique identifier for the tenant.
+      schema:
+        type: string
+        example: <tenant-id>
+    WithTotal:
+      name: with_total
+      in: query
+      required: false
+      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
+
+
+        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
+
+        '
+      schema:
+        type: boolean
+        default: false
   responses:
-    Unauthorized:
-      description: Authentication Required — no valid Bearer token was provided.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
     InternalError:
       description: Internal Server Error — an unexpected error occurred.
       content:
@@ -320,46 +348,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication Required — no valid Bearer token was provided.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
     BadRequest:
       description: Bad Request — the request was malformed or contained invalid parameters.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-  parameters:
-    ApiVersionHeader:
-      name: api-version
-      in: header
-      required: true
-      description: 'A supported version of the Amperity API. For example: 2024-04-01.'
-      schema:
-        type: string
-        enum:
-        - '2024-04-01'
-        - unstable
-        default: unstable
-        example: '2024-04-01'
-    WithTotal:
-      name: with_total
-      in: query
-      required: false
-      description: 'Set this value to `true` to include a total count of all results. Default value: `false`.
-
-
-        > **Note:** Obtaining the total count of all results can be an expensive operation when there is a high number of pages in the results set.
-
-        '
-      schema:
-        type: boolean
-        default: false
-    AmperityTenant:
-      name: amperity-tenant
-      in: header
-      required: true
-      description: The unique identifier for the tenant.
-      schema:
-        type: string
-        example: <tenant-id>
   securitySchemes:
     BearerAuth:
       type: http
