@@ -13,6 +13,7 @@ checked:
 - https://n8n.io/integrations/amperity/
 - https://zapier.com/apps/amperity/integrations
 - microsoft-teams/integrations/microsoft-teams-integration-edges.yml
+- https://marketplace.databricks.com/
 summary: null
 marketplace_apps: []
 edges:
@@ -65,4 +66,33 @@ edges:
   category: Microsoft Teams app
   publisher_verified:
   - Microsoft 365 Publisher Attestation
+- partner_name: Databricks Marketplace
+  partner: databricks
+  partner_match: aggregator
+  type: marketplace
+  marketplace: databricks-marketplace
+  channel: distribution
+  relationship: distribution-channel
+  direction: third-party
+  evidence: https://marketplace.databricks.com/provider/34f40a16-df53-435e-8c31-fec310b8d131
+  category: data product listing
+  contract_reference:
+    register: Databricks Marketplace (marketplace.databricks.com/api/2.0/public-marketplace-providers + public-marketplace-listings)
+    spec_file: null
+    role: data-marketplace-seller
+    registered_name: Amperity
+    matched_domain: amperity.com
+    matched_by: domain
+    listings: 6
+    sample_listings:
+    - AI-Driven Personalization
+    - Amperity's Identity Resolution Agent - 30 Day Trial
+    - Chuck Data Sample Data
+    - Customer Acquisition & Retention Ratio (Leaky Bucket)
+    - Customer Value Migration
+    signal_note: 'participation: the provider lists data products on this marketplace; counts are context'
+    detected_by: sweep-data-marketplaces.py
+    detected: '2026-10-20'
+  detected_by: sweep-data-marketplaces.py
+  detected: '2026-10-20'
 templates: []
