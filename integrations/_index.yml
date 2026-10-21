@@ -70,3 +70,35 @@
     detected: '2026-10-20'
   status: not-a-workflow
   arazzo: null
+- slug: amperity-amazon-ads-partner-directory
+  label: Amazon Ads Partner Directory
+  partner: amazon
+  partner_name: Amazon Ads Partner Directory
+  category: Amazon Ads partner (services)
+  type: register
+  channel: standard-directory
+  evidence: https://advertising.amazon.com/partners/directory
+  source: edge
+  relationship: standard-participant
+  contract_reference:
+    register: Amazon Ads Partner Directory (advertising.amazon.com/partners/directory, GetPartners)
+    registered_name: Amperity
+    register_id: amzn1.ads1.ma1.11m75lzdi6n4s5t3mln5mnycc
+    matched_domain: amperity.com
+    matched_by: domain
+    services:
+    - AUDIENCE_AND_TARGETING
+    - CLEAN_ROOM_ANALYTICS
+    - CLEAN_ROOM_DEVELOPER
+    - CUSTOMER_DATA_PLATFORM
+    - DATA_INTEGRATION
+    ads_products:
+    - AMAZON_DSP
+    service_models:
+    - TOOL_PROVIDER
+    signal_note: listing = participation; accreditation recorded as partner_tier; ads_certifications are Amazon
+      Ads LEARNING certifications held by staff, not product conformance, never certified_products
+    detected_by: sweep-amazon-sp-api-appstore.py
+    detected: '2026-10-21'
+  status: not-a-workflow
+  arazzo: null
