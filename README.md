@@ -64,6 +64,144 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Amperity is a company surfaced as a portfolio company of general-catalyst and added to the API Evangelist network as a stub for enrichment. Sector: enterprise. This profile is a lead awaiting the enrichment pipeline.
+Amperity is a Seattle-based customer data platform (CDP) that helps consumer brands build accurate, unified customer profiles by stitching together fragmented first-party data from across their systems. Using AI-powered identity resolution (its patented Stitch technology), Amperity assembles a durable Customer 360 that powers segmentation, marketing campaigns, personalization, analytics, and activation to downstream destinations. For developers, Amperity exposes three public REST APIs: the Amperity API for programmatic access to tenant resources (campaigns, segments, ingest jobs, audit events, and workflow runs), the Profile API for real-time access to unified customer profiles by index, and the Streaming API for low-latency, high-throughput ingestion of events from external systems. Amperity publishes a downloadable OpenAPI 3.0.3 document for the Amperity API plus a separate unstable preview spec, and it hosts an official remote Model Context Protocol server at mcp.amperity.com exposing more than 200 tools across databases, queries, Stitch identity resolution, couriers, destinations, campaigns, journeys and predictive models, gated by OAuth2 authorization-code with PKCE and per-session safety modes. The REST APIs use OAuth2 client-credentials tokens (JWT bearer), cursor pagination, date-based versioning via an api-version header, and an RFC 8594 deprecation/sunset policy. Amperity serves retail, travel, hospitality, financial services, and other consumer-facing verticals.
 
-Source: portfolio company of [general-catalyst](https://github.com/api-evangelist/general-catalyst) — https://www.amperity.com
+**Areas:** Company · Enterprise · Customer Data Platform · CDP · Identity Resolution · Customer 360 · Marketing · Data · Profiles · Analytics · MCP · Agents
+
+## Amperity on APIs.io
+
+Everything profiled for Amperity is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/amperity/](https://apis.io/providers/amperity/)** — or go straight to one of the APIs or properties below.
+
+### APIs (8)
+
+- [Amperity MCP Server](https://apis.io/apis/amperity/amperity-mcp-server/) — Amperity's official hosted remote Model Context Protocol server. A single public endpoint at https://mcp.amperity.com routes each request to the Amperity…
+- [Amperity Profile API](https://apis.io/apis/amperity/amperity-profile-api/) — RESTful API for real-time access to unified customer profiles. List indexes, fetch an index, and read paginated customer profiles (or a single profile) for…
+- [Amperity Streaming API](https://apis.io/apis/amperity/amperity-streaming-api/) — Low-latency, high-throughput REST API for real-time ingestion of event data from external systems into Amperity. POST JSON or XML payloads (up to 1 MB) to a…
+- [Amperity Audit Events API](https://apis.io/apis/amperity/amperity-audit-events-api/) — Return records for user activity that occurred in your tenant.
+- [Amperity Campaigns API](https://apis.io/apis/amperity/amperity-campaigns-api/) — Return information about campaigns and campaign drafts.
+- [Amperity Ingest API](https://apis.io/apis/amperity/amperity-ingest-api/) — Return details about ingest jobs.
+- [Amperity Segments API](https://apis.io/apis/amperity/amperity-segments-api/) — Return a list of segments available in your tenant.
+- [Amperity Workflow API](https://apis.io/apis/amperity/amperity-workflow-api/) — List, run, and stop workflows.
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Amperity Webhooks](https://apis.io/asyncapis/amperity/amperity-webhooks/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [amperity](https://apis.io/servers/amperity/amperity/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Amperity Agentic Access](https://apis.io/agentic-access/amperity/amperity-agentic-access/)
+
+#### Collections (2)
+
+Postman and Open Collection request collections.
+
+- [Amperity API](https://apis.io/collections/amperity/open-amperity-control-plane-2024-04-01/)
+- [Amperity API (Unstable)](https://apis.io/collections/amperity/open-amperity-control-plane-unstable/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Amperity Control Plane Overlay](https://apis.io/overlays/amperity/amperity-control-plane-overlay/)
+
+#### Security (3)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Amperity Authentication](https://apis.io/security/amperity/amperity-authentication/)
+- [Amperity Domain Security](https://apis.io/security/amperity/amperity-domain-security/)
+- [Amperity Trust Center](https://apis.io/security/amperity/amperity-trust-center/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Amperity Plans Pricing](https://apis.io/plans/amperity/amperity-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Amperity Rate Limits](https://apis.io/rate-limits/amperity/amperity-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.amperity.com)
+- [Documentation](https://docs.amperity.com)
+- [Getting started](https://docs.amperity.com/api/overview.html)
+- [API reference](https://docs.amperity.com/reference/api.html)
+- [Blog](https://amperity.com/blog)
+- [Compliance](https://trust.amperity.com/)
+- [GitHub](https://github.com/amperity)
+- [Status](https://status.amperity.com)
+
+## API Evangelist rating
+
+**Kin Score 50.0** — developing · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 73.2 |
+| Contract quality | 58.7 |
+| Contract governance | 18.2 |
+| Operational transparency | 81.6 |
+| Developer ergonomics | 58.9 |
+| Access clarity | 15.8 |
+
+**Agent readiness 47.1** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | served (partial credit) |
+| Idempotency | — |
+| Error Semantics | documented (partial credit) |
+| OpenAPI Examples | — |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | yes |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | verified |
+| Dynamic Client Registration | yes |
+| Agentic Commerce | — |
+| Pagination Ratio | paginated |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 21.6** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/amperity/](https://apis.io/providers/amperity/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Amperity: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/amperity/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
